@@ -373,13 +373,23 @@ class PygameAudioRecorder:
     def _choose_capture_device_name(self) -> str:
         names = self._safe_device_list()
         log.info("SDL2 capture devices: %s", names)
+
         if not names:
             return ""
 
+        # Best choice first
         for name in names:
             lower = name.lower()
-            if "microphone" in lower or "mic" in lower:
+            if "digital microphone" in lower:
                 return name
+
+        # Avoid unplugged headphone mics
+        for name in names:
+            lower = name.lower()
+            if "microphone" in lower and "headphone" not in lower:
+                return name
+
+        # Fallback
         return names[0]
 
     def _callback(self, audiodevice, audiomemoryview) -> None:
