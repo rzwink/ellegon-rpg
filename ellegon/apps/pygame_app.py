@@ -343,11 +343,10 @@ class PygameAudioRecorder:
         if not names:
             return ""
 
-        preferred_tokens = ["default", "pulse", "pipewire", "usb", "microphone", "mic"]
-        for token in preferred_tokens:
-            for n in names:
-                if token in n.lower():
-                    return n
+        for name in names:
+            lower = name.lower()
+            if "microphone" in lower or "mic" in lower:
+                return name
         return names[0]
 
     def _callback(self, audiodevice, audiomemoryview) -> None:
