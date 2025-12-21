@@ -50,19 +50,19 @@ ellegon-rpg/
 ├── ellegon-campaign.schema.json
 ├── campaigns/
 │   ├── 001/
-│   │   ├── campaign.json
-│   │   └── intro.txt
+│   │   └── campaign.json
 │   └── 002/
-│       ├── campaign.json
-│       └── intro.txt
+│       └── campaign.json
 ├── ellegon/
 │   ├── cli.py
+│   ├── apps/
 │   ├── config.py
 │   ├── campaigns/
 │   ├── llm/
 │   ├── prompts/
 │   ├── service/
-│   └── sessions/
+│   ├── sessions/
+│   └── speech/
 ├── tests/
 ├── requirements.txt
 ├── README.md
@@ -90,7 +90,7 @@ ellegon-rpg/
   Defines Ellegon’s personality, tone, and Dungeon Master behavior.
 
 * campaigns/
-  Campaign definitions (each folder contains `campaign.json` plus a reference `intro.txt`).
+  Campaign definitions (each folder contains `campaign.json` with inline intro text).
 
 * saves/
   Generated automatically at runtime as `saves/<campaign>/<instance>.json`.
@@ -109,7 +109,7 @@ A campaign includes:
 * Acts with success and failure guidance
 * Locations and NPCs
 * Rewards and endings
-* Optional intro text (stored in `campaign.json`; `intro.txt` is a reference file)
+* Optional intro text stored inline in `campaign.json`
 
 This allows:
 
@@ -132,6 +132,13 @@ This allows:
 
 ```bash
 pip install -r requirements.txt
+```
+
+Optional extras:
+
+```bash
+pip install ".[api]"
+pip install ".[pygame]"
 ```
 
 Set your API key (or place in `.env`):
@@ -174,6 +181,29 @@ Progress is saved automatically after each turn.
 
 ---
 
+## FastAPI Service
+
+Create a FastAPI app for web sessions:
+
+```bash
+uvicorn ellegon.apps.api_app:create_app --factory --reload
+```
+
+---
+
+## Pygame Voice Client
+
+Install pygame extras and run the desktop client:
+
+```bash
+python -m ellegon.apps.pygame_app --campaign 001 --instance kid1 --players 1
+```
+
+The Pygame client uses OpenAI speech APIs for transcription and narration, so it requires
+`OPENAI_API_KEY`.
+
+---
+
 ## Voice Interaction
 
 Ellegon is designed for voice first play:
@@ -183,7 +213,7 @@ Ellegon is designed for voice first play:
 * Dice roll instructions
 * Simple questions
 
-Speech to text and text to speech are intentionally left out of this repo so you can choose the tools that fit your platform.
+Speech to text and text to speech are provided via OpenAI speech APIs in the Pygame client.
 
 ---
 
