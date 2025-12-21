@@ -1,6 +1,6 @@
 # Ellegon
 
-Ellegon is a voice friendly, AI powered Dungeon Master engine.  
+Ellegon is a voice friendly, AI powered Dungeon Master engine.
 It runs short, guided fantasy adventures with clear rules, structured campaigns, and a definite ending.
 
 Ellegon is built to feel like a real tabletop experience:
@@ -44,42 +44,62 @@ Ellegon is not:
 ## Repository Structure
 
 ```text
-ellegon/
+ellegon-rpg/
 ├── app.py
 ├── system_prompt.txt
 ├── ellegon-campaign.schema.json
 ├── campaigns/
-│   └── goblin_cave/
-│       └── campaign.json
-├── saves/
-│   └── (generated at runtime)
+│   ├── 001/
+│   │   ├── campaign.json
+│   │   └── intro.txt
+│   └── 002/
+│       ├── campaign.json
+│       └── intro.txt
+├── ellegon/
+│   ├── cli.py
+│   ├── config.py
+│   ├── campaigns/
+│   ├── llm/
+│   ├── prompts/
+│   ├── service/
+│   └── sessions/
+├── tests/
+├── requirements.txt
 ├── README.md
-├── LICENSE
-└── CONTRIBUTING.md
-````
+└── LICENSE
+```
 
 ### Key Files
 
 * app.py
-  The main CLI application that runs Ellegon.
+  Entry point for the CLI (calls `ellegon.cli.main`).
 
-* system_prompt.txt
-  Defines Ellegon’s personality, tone, and Dungeon Master behavior.
+* ellegon/cli.py
+  Argument parsing, save loading, and the interactive play loop.
+
+* ellegon/service/engine.py
+  Session orchestration and LLM calls.
+
+* ellegon/prompts/instructions.py
+  Builds the prompt payload given the campaign and save state.
 
 * ellegon-campaign.schema.json
   JSON Schema used to validate campaign files.
 
+* system_prompt.txt
+  Defines Ellegon’s personality, tone, and Dungeon Master behavior.
+
 * campaigns/
-  Contains individual campaign definitions.
+  Campaign definitions (each folder contains `campaign.json` plus a reference `intro.txt`).
 
 * saves/
-  Generated automatically. Stores progress per campaign instance.
+  Generated automatically at runtime as `saves/<campaign>/<instance>.json`.
 
 ---
 
 ## Campaign Format
 
-Campaigns are defined entirely in JSON and validated against a schema.
+Campaigns are defined in JSON and validated against `ellegon-campaign.schema.json`.
 
 A campaign includes:
 
@@ -89,7 +109,7 @@ A campaign includes:
 * Acts with success and failure guidance
 * Locations and NPCs
 * Rewards and endings
-* Optional spoken intro text
+* Optional intro text (stored in `campaign.json`; `intro.txt` is a reference file)
 
 This allows:
 
@@ -114,28 +134,41 @@ This allows:
 pip install -r requirements.txt
 ```
 
-Set your API key (or place in .env):
+Set your API key (or place in `.env`):
 
 ```bash
 export OPENAI_API_KEY="your_key_here"
 ```
 
+Optional overrides:
+
+```bash
+export ELLEGON_CAMPAIGNS_ROOT="/path/to/campaigns"
+export ELLEGON_SAVES_ROOT="/path/to/saves"
+```
+
 ### Run a Campaign
 
 ```bash
-python app.py --campaign goblin_cave --instance kid1 --players 1
+python app.py --campaign 001 --instance kid1 --players 1
 ```
 
 Arguments:
 
 * --campaign
-  Folder name under campaigns/
+  Folder name under `campaigns/` (for example `001`).
 
 * --instance
-  Unique identifier for this playthrough
+  Unique identifier for this playthrough; used as the save file name.
 
 * --players
-  Number of players currently participating
+  Number of players currently participating.
+
+* --model
+  OpenAI model name (defaults to `gpt-5.2-2025-12-11`).
+
+* --fake-gateway
+  Use a deterministic fake LLM gateway (no network calls).
 
 Progress is saved automatically after each turn.
 
@@ -151,6 +184,14 @@ Ellegon is designed for voice first play:
 * Simple questions
 
 Speech to text and text to speech are intentionally left out of this repo so you can choose the tools that fit your platform.
+
+---
+
+## Tests
+
+```bash
+pytest
+```
 
 ---
 
@@ -174,20 +215,6 @@ You may:
 Commercial licenses are available.
 
 See LICENSE for full terms.
-
----
-
-## Contributing
-
-Contributions are welcome for:
-
-* Bug fixes
-* Campaign examples
-* Documentation improvements
-
-All contributions must agree to the terms in CONTRIBUTING.md.
-
-By contributing, you agree that your contributions may be relicensed by the project owner.
 
 ---
 
