@@ -6,6 +6,13 @@ from typing import Optional
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MODEL = "gpt-5.2-2025-12-11"
+DEFAULT_STT_MODEL = "gpt-4o-mini-transcribe"
+DEFAULT_TTS_MODEL = "gpt-4o-mini-tts"
+DEFAULT_TTS_VOICE = "alloy"
+DEFAULT_TTS_FORMAT = "mp3"
+DEFAULT_AUDIO_SAMPLE_RATE = 16000
+DEFAULT_AUDIO_CHANNELS = 1
+DEFAULT_AUDIO_SAMPLE_WIDTH = 2
 
 SYSTEM_PROMPT_PATH = PROJECT_ROOT / "system_prompt.txt"
 

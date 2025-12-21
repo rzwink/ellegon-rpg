@@ -1,0 +1,18 @@
+[project]
+name = "ellegon"
+version = "0.1.0"
+description = "Ellegon voice-friendly Dungeon Master engine"
+requires-python = ">=3.10"
+dependencies = [
+  "jsonschema==4.25.1",
+  "openai==2.14.0",
+  "pydantic==2.12.5",
+  "python-dotenv==1.2.1",
+]
+
+[project.optional-dependencies]
+api = ["fastapi==0.115.0", "uvicorn==0.30.6"]
+pygame = ["pygame==2.6.1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
