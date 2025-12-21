@@ -18,6 +18,121 @@
     ]
   },
 
+  "ruleset": {
+    "system_name": "Wings of Fire Light Adventure Rules",
+    "design_goals": [
+      "Easy to understand",
+      "Voice friendly",
+      "Story first",
+      "Forgiving outcomes"
+    ],
+
+    "core_mechanics": {
+      "primary_die": "d20",
+      "success_thresholds": {
+        "success": "15 or higher",
+        "partial_success": "10 to 14",
+        "failure": "9 or lower",
+        "critical_success": "20",
+        "critical_failure": "1"
+      },
+      "damage_die": "d6",
+      "failure_philosophy": "Failure never stops the story. It adds complications, not dead ends."
+    },
+
+    "character_basics": {
+      "starting_hit_points": {
+        "default": 10,
+        "tough": 12,
+        "fragile": 9
+      },
+      "tracked_attributes": [
+        "name",
+        "tribe",
+        "description",
+        "hit_points",
+        "inventory",
+        "currency"
+      ],
+      "death_rules": "Dragons are never killed. At zero hit points, they are exhausted, captured, or forced to retreat."
+    },
+
+    "combat_rules": {
+      "style": "Light, turn based, and non graphic",
+      "enemy_hit_points_range": "3 to 8",
+      "combat_end_condition": "Combat ends when the story outcome is clear, not when every enemy is defeated"
+    },
+
+    "dragon_tribes": {
+      "MudWing": {
+        "theme": "Strength and loyalty",
+        "starting_hit_points": 12,
+        "ability": "Once per scene, automatically succeed at a strength based action",
+        "limitation": "Not stealthy or fast"
+      },
+      "SandWing": {
+        "theme": "Survival and cunning",
+        "starting_hit_points": 10,
+        "ability": "Once per fight, a successful attack can deal extra d6 damage with venom",
+        "limitation": "Venom must be used carefully"
+      },
+      "SkyWing": {
+        "theme": "Speed and bravery",
+        "starting_hit_points": 10,
+        "ability": "Once per scene, automatically succeed at a flying or chasing action",
+        "limitation": "Prone to rushing into danger"
+      },
+      "SeaWing": {
+        "theme": "Water and communication",
+        "starting_hit_points": 10,
+        "ability": "Breathe underwater and gain advantage on water based actions once per scene",
+        "limitation": "Dry environments may cause fatigue"
+      },
+      "RainWing": {
+        "theme": "Camouflage and creativity",
+        "starting_hit_points": 9,
+        "ability": "Once per scene, become invisible or perfectly camouflaged",
+        "limitation": "Physically weaker in combat"
+      },
+      "IceWing": {
+        "theme": "Discipline and cold",
+        "starting_hit_points": 11,
+        "ability": "Once per fight, freeze or slow an enemy instead of dealing damage",
+        "limitation": "Heat weakens effectiveness"
+      },
+      "NightWing": {
+        "theme": "Insight and mystery",
+        "starting_hit_points": 10,
+        "ability": "Once per session, ask the Dungeon Master one helpful question",
+        "limitation": "Using powers attracts attention"
+      },
+      "HiveWing": {
+        "theme": "Adaptation and strategy",
+        "starting_hit_points": 10,
+        "ability": "Once per scene, choose a minor special effect like poison or stun",
+        "limitation": "Abilities may cause complications"
+      },
+      "SilkWing": {
+        "theme": "Movement and light",
+        "starting_hit_points": 9,
+        "ability": "Once per scene, create silk or flamesilk for movement or light",
+        "limitation": "Fragile in direct combat"
+      },
+      "LeafWing": {
+        "theme": "Nature and protection",
+        "starting_hit_points": 10,
+        "ability": "Once per scene, grow plants or vines to help or block paths",
+        "limitation": "Powers are weaker in barren places"
+      }
+    },
+
+    "hybrid_rules": {
+      "allowed": true,
+      "rule": "Choose one ability from either parent tribe and keep both limitations",
+      "stacking": "Abilities never stack"
+    }
+  },
+
   "starting_state": {
     "location": "High mountain ledge overlooking the Sky Realms",
     "location_description": "A wide stone ledge clings to the side of a towering mountain. Far below, clouds drift over forests, deserts, oceans, and icy lands. Dragons of many colors soar through the sky.",

@@ -2,3 +2,5 @@ saves/*
 .venv
 .env
 .idea/
+__pycache__
+debug_audio

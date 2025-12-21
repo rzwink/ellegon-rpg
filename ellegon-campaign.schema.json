@@ -53,6 +53,14 @@
       }
     },
 
+    "ruleset": {
+      "description": "Optional ruleset block for campaigns that include explicit mechanics (example: Wings of Fire Light Adventure Rules).",
+      "oneOf": [
+        { "type": "string" },
+        { "$ref": "#/$defs/ruleset" }
+      ]
+    },
+
     "starting_state": {
       "type": "object",
       "additionalProperties": false,
@@ -136,6 +144,7 @@
         }
       ]
     },
+
     "intro": {
       "description": "Optional campaign intro. Either plain text or a structured object.",
       "oneOf": [
@@ -163,6 +172,116 @@
         "silver": { "type": "integer", "minimum": 0 },
         "gold": { "type": "integer", "minimum": 0 },
         "platinum": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "ruleset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system_name"],
+      "properties": {
+        "system_name": { "type": "string", "minLength": 1 },
+        "design_goals": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "core_mechanics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["primary_die", "success_thresholds"],
+          "properties": {
+            "primary_die": { "type": "string", "minLength": 1 },
+            "success_thresholds": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "success",
+                "partial_success",
+                "failure",
+                "critical_success",
+                "critical_failure"
+              ],
+              "properties": {
+                "success": { "type": "string", "minLength": 1 },
+                "partial_success": { "type": "string", "minLength": 1 },
+                "failure": { "type": "string", "minLength": 1 },
+                "critical_success": { "type": "string", "minLength": 1 },
+                "critical_failure": { "type": "string", "minLength": 1 }
+              }
+            },
+            "damage_die": { "type": "string", "minLength": 1 },
+            "failure_philosophy": { "type": "string" }
+          }
+        },
+        "character_basics": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "starting_hit_points": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "default": { "type": "integer", "minimum": 1, "maximum": 999 },
+                "tough": { "type": "integer", "minimum": 1, "maximum": 999 },
+                "fragile": { "type": "integer", "minimum": 1, "maximum": 999 }
+              }
+            },
+            "tracked_attributes": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "death_rules": { "type": "string" }
+          }
+        },
+        "combat_rules": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "style": { "type": "string" },
+            "enemy_hit_points_range": { "type": "string" },
+            "combat_end_condition": { "type": "string" }
+          }
+        },
+        "dragon_tribes": {
+          "description": "Mapping of tribe name to tribe rule details.",
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/$defs/tribe_rules" }
+        },
+        "hybrid_rules": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allowed": { "type": "boolean" },
+            "rule": { "type": "string" },
+            "stacking": { "type": "string" }
+          }
+        },
+        "animus_magic": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "rule": { "type": "string" },
+            "cost_warning": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "tribe_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["theme", "starting_hit_points", "ability", "limitation"],
+      "properties": {
+        "theme": { "type": "string", "minLength": 1 },
+        "starting_hit_points": { "type": "integer", "minimum": 1, "maximum": 999 },
+        "ability": { "type": "string", "minLength": 1 },
+        "limitation": { "type": "string", "minLength": 1 }
       }
     },
 

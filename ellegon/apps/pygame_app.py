@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import io
+import logging
 import os
 import queue
 import textwrap
 import threading
+import time
+import wave
 from collections import deque
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Deque, Iterable, Optional
 
@@ -25,12 +31,53 @@ STATUS_LISTENING = "Listening"
 STATUS_THINKING = "Thinking"
 STATUS_SPEAKING = "Speaking"
 
+log = logging.getLogger("ellegon.pygame")
+
+
+def setup_logging(debug: bool) -> None:
+    level = logging.DEBUG if debug else logging.INFO
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
+    logging.getLogger("openai").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+
+
+def _utc_ts() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def _audio_debug_dir() -> Path:
+    p = Path("debug_audio")
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def _write_debug_wav(wav_bytes: bytes, *, prefix: str) -> Path:
+    digest = hashlib.sha1(wav_bytes).hexdigest()[:10]
+    safe_ts = _utc_ts().replace(":", "").replace(".", "")
+    path = _audio_debug_dir() / f"{prefix}_{safe_ts}_{digest}.wav"
+    path.write_bytes(wav_bytes)
+    return path
+
+
+def _wav_info(wav_bytes: bytes) -> str:
+    with wave.open(io.BytesIO(wav_bytes), "rb") as wf:
+        ch = wf.getnchannels()
+        sr = wf.getframerate()
+        sw = wf.getsampwidth()
+        nframes = wf.getnframes()
+        dur = nframes / float(sr) if sr else 0.0
+    return f"wav(ch={ch}, sr={sr}, sw={sw}, frames={nframes}, dur={dur:.2f}s)"
+
 
 @dataclass(frozen=True)
 class AudioCaptureConfig:
     sample_rate: int
     channels: int
     sample_width: int
+    chunk_size: int  # frames per callback
 
 
 def default_audio_capture_config() -> AudioCaptureConfig:
@@ -38,6 +85,7 @@ def default_audio_capture_config() -> AudioCaptureConfig:
         sample_rate=config.DEFAULT_AUDIO_SAMPLE_RATE,
         channels=config.DEFAULT_AUDIO_CHANNELS,
         sample_width=config.DEFAULT_AUDIO_SAMPLE_WIDTH,
+        chunk_size=1024,
     )
 
 
@@ -97,6 +145,8 @@ def format_transcript_lines(
 class WorkerTask:
     kind: str
     audio_bytes: Optional[bytes] = None
+    debug_stt: bool = False
+    capture_id: str = ""
 
 
 class JobQueue:
@@ -136,8 +186,10 @@ class JobQueue:
     def submit_starter(self) -> None:
         self._tasks.put(WorkerTask(kind="starter"))
 
-    def submit_audio(self, audio_bytes: bytes) -> None:
-        self._tasks.put(WorkerTask(kind="audio", audio_bytes=audio_bytes))
+    def submit_audio(self, audio_bytes: bytes, *, debug_stt: bool, capture_id: str) -> None:
+        self._tasks.put(
+            WorkerTask(kind="audio", audio_bytes=audio_bytes, debug_stt=debug_stt, capture_id=capture_id)
+        )
 
     def _run(self) -> None:
         while True:
@@ -147,27 +199,70 @@ class JobQueue:
             if task.kind == "starter":
                 self._handle_starter()
             elif task.kind == "audio" and task.audio_bytes:
-                self._handle_audio(task.audio_bytes)
+                self._handle_audio(task.audio_bytes, debug_stt=task.debug_stt, capture_id=task.capture_id)
 
     def _handle_starter(self) -> None:
         try:
+            self._events.put(WorkerEvent(type="thinking"))
             dm_text = self._engine.start_session_if_new(self._save, self._model_name)
             if not dm_text:
                 self._events.put(WorkerEvent(type="idle"))
                 return
             self._events.put(WorkerEvent(type="dm_text", text=dm_text))
+            self._events.put(WorkerEvent(type="speaking"))
             audio_bytes = self._tts.synthesize_speech(
                 dm_text, voice=self._tts_voice, audio_format=self._tts_format
             )
             self._events.put(WorkerEvent(type="tts_audio", audio_bytes=audio_bytes))
-        except Exception as exc:  # noqa: BLE001 - surface friendly errors to UI
+        except Exception as exc:
+            log.exception("Starter handler failed")
             self._events.put(WorkerEvent(type="error", message=str(exc)))
 
-    def _handle_audio(self, audio_bytes: bytes) -> None:
+    def _handle_audio(self, audio_bytes: bytes, *, debug_stt: bool, capture_id: str) -> None:
         try:
             self._events.put(WorkerEvent(type="thinking"))
+            log.debug("Handling audio capture_id=%s bytes=%d", capture_id, len(audio_bytes))
+
+            if debug_stt:
+                try:
+                    dbg_path = _write_debug_wav(audio_bytes, prefix=f"capture_{capture_id}")
+                    msg = f"STT debug: wrote {dbg_path}"
+                    log.info(msg)
+                    self._events.put(WorkerEvent(type="message", message=msg))
+                except Exception as exc:
+                    msg = f"STT debug: failed to write wav: {exc}"
+                    log.warning(msg)
+                    self._events.put(WorkerEvent(type="message", message=msg))
+
+                try:
+                    info = _wav_info(audio_bytes)
+                    msg = f"STT debug: {info}"
+                    log.info(msg)
+                    self._events.put(WorkerEvent(type="message", message=msg))
+                except Exception as exc:
+                    msg = f"STT debug: wav parse failed: {exc}"
+                    log.warning(msg)
+                    self._events.put(WorkerEvent(type="message", message=msg))
+
+            t0 = time.time()
             transcript = self._stt.transcribe_wav_bytes(audio_bytes)
-            if not transcript.strip():
+            dt_ms = int((time.time() - t0) * 1000)
+
+            preview = (transcript or "").strip().replace("\n", " ")
+            if len(preview) > 200:
+                preview = preview[:200] + "..."
+
+            log.info("STT capture_id=%s took=%dms text=%r", capture_id, dt_ms, preview)
+
+            if debug_stt:
+                self._events.put(
+                    WorkerEvent(
+                        type="message",
+                        message=f"STT debug: transcribed in {dt_ms}ms, text='{preview}'",
+                    )
+                )
+
+            if not (transcript or "").strip():
                 self._events.put(
                     WorkerEvent(
                         type="message",
@@ -176,49 +271,108 @@ class JobQueue:
                 )
                 self._events.put(WorkerEvent(type="idle"))
                 return
+
             self._events.put(WorkerEvent(type="transcript", text=transcript))
-            dm_text = self._engine.run_player_turn(
-                self._save, transcript, self._model_name
-            )
+
+            dm_text = self._engine.run_player_turn(self._save, transcript, self._model_name)
             self._events.put(WorkerEvent(type="dm_text", text=dm_text))
+            self._events.put(WorkerEvent(type="speaking"))
+
             audio_reply = self._tts.synthesize_speech(
                 dm_text, voice=self._tts_voice, audio_format=self._tts_format
             )
             self._events.put(WorkerEvent(type="tts_audio", audio_bytes=audio_reply))
-        except Exception as exc:  # noqa: BLE001 - surface friendly errors to UI
+        except Exception as exc:
+            log.exception("Audio handler failed capture_id=%s", capture_id)
             self._events.put(WorkerEvent(type="error", message=str(exc)))
 
 
 class PygameAudioRecorder:
-    def __init__(self, config: AudioCaptureConfig) -> None:
+    """
+    SDL2 capture is callback-driven. We collect PCM16 frames in the callback.
+    On some systems, the default capture device is not resolvable, so we
+    enumerate and pick a device name explicitly.
+    """
+
+    def __init__(self, cfg: AudioCaptureConfig, *, device_name: Optional[str] = None) -> None:
         from pygame._sdl2 import audio as sdl2_audio
 
+        self._cfg = cfg
         self._audio = sdl2_audio
-        self._config = config
-        self._device = sdl2_audio.AudioDevice(
-            devicename=None,
-            iscapture=True,
-            frequency=config.sample_rate,
-            channels=config.channels,
-            format=sdl2_audio.AUDIO_S16,
-        )
         self._frames: list[bytes] = []
+        self._recording = False
+        self._lock = threading.Lock()
 
-    def start(self) -> None:
-        self._frames = []
-        self._device.pause(0)
+        chosen = device_name or self._choose_capture_device_name()
+        if not isinstance(chosen, str):
+            chosen = str(chosen or "")
 
-    def poll(self) -> None:
-        buffer_size = self._device.get_buffer_size()
-        if buffer_size <= 0:
+        log.info("Using capture device: %r", chosen)
+        log.debug("Capture cfg: sr=%s ch=%s chunk=%s", cfg.sample_rate, cfg.channels, cfg.chunk_size)
+
+        try:
+            self._device = sdl2_audio.AudioDevice(
+                chosen,
+                1,
+                cfg.sample_rate,
+                sdl2_audio.AUDIO_S16,
+                cfg.channels,
+                cfg.chunk_size,
+                0,
+                self._callback,
+            )
+        except Exception as exc:
+            names = self._safe_device_list()
+            raise RuntimeError(
+                "Unable to open a microphone capture device via pygame SDL2.\n"
+                f"Tried device_name={chosen!r}\n"
+                f"Capture devices visible to SDL2: {names}\n"
+            ) from exc
+
+        self._device.pause(True)
+
+    def _safe_device_list(self) -> list[str]:
+        try:
+            return list(self._audio.get_audio_device_names(iscapture=1))
+        except Exception:
+            return []
+
+    def _choose_capture_device_name(self) -> str:
+        names = self._safe_device_list()
+        log.info("SDL2 capture devices: %s", names)
+        if not names:
+            return ""
+
+        preferred_tokens = ["default", "pulse", "pipewire", "usb", "microphone", "mic"]
+        for token in preferred_tokens:
+            for n in names:
+                if token in n.lower():
+                    return n
+        return names[0]
+
+    def _callback(self, audiodevice, audiomemoryview) -> None:
+        if not self._recording:
             return
-        data = self._device.read(buffer_size)
-        if data:
+        data = bytes(audiomemoryview)
+        if not data:
+            return
+        with self._lock:
             self._frames.append(data)
 
+    def start(self) -> None:
+        with self._lock:
+            self._frames = []
+        self._recording = True
+        self._device.pause(False)
+
     def stop(self) -> bytes:
-        self._device.pause(1)
-        return b"".join(self._frames)
+        self._device.pause(True)
+        self._recording = False
+        with self._lock:
+            return b"".join(self._frames)
+
+    def poll(self) -> None:
+        return
 
 
 def _load_system_prompt() -> str:
@@ -242,7 +396,14 @@ def main() -> None:
     parser.add_argument("--tts-model", default=config.DEFAULT_TTS_MODEL, help="OpenAI TTS model name")
     parser.add_argument("--tts-voice", default=config.DEFAULT_TTS_VOICE, help="OpenAI TTS voice name")
     parser.add_argument("--tts-format", default=config.DEFAULT_TTS_FORMAT, help="Audio format for TTS output")
+    parser.add_argument(
+        "--debug-stt",
+        action="store_true",
+        help="Enable speech-to-text debug logs and write captured WAVs to ./debug_audio/",
+    )
     args = parser.parse_args()
+
+    setup_logging(args.debug_stt)
 
     load_dotenv()
     _ensure_api_key()
@@ -262,6 +423,11 @@ def main() -> None:
     tts_client = OpenAITTS(model=args.tts_model, voice=args.tts_voice, audio_format=args.tts_format)
 
     pygame.init()
+    try:
+        pygame.mixer.init()
+    except Exception:
+        log.warning("pygame.mixer.init failed; audio playback may not work")
+
     pygame.display.set_caption("Ellegon")
     screen = pygame.display.set_mode((900, 600))
     font = pygame.font.SysFont(None, 28)
@@ -271,7 +437,9 @@ def main() -> None:
     if warning:
         status_state.message = warning
 
-    recorder = PygameAudioRecorder(default_audio_capture_config())
+    cap_cfg = default_audio_capture_config()
+    recorder = PygameAudioRecorder(cap_cfg)
+
     job_queue = JobQueue(
         engine=engine,
         save=save,
@@ -292,36 +460,37 @@ def main() -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and not recording:
                 recording = True
                 recorder.start()
-                status_state = apply_worker_event(
-                    status_state, WorkerEvent(type="listening")
-                )
+                status_state = apply_worker_event(status_state, WorkerEvent(type="listening"))
+                log.debug("Recording started")
+
             if event.type == pygame.KEYUP and event.key == pygame.K_SPACE and recording:
                 recording = False
                 pcm_bytes = recorder.stop()
+                log.debug("Recording stopped pcm_bytes=%d", len(pcm_bytes))
+
                 if not pcm_bytes:
                     status_state = apply_worker_event(
                         status_state,
-                        WorkerEvent(
-                            type="message",
-                            message="I didn't hear anything. Try again when you're ready.",
-                        ),
+                        WorkerEvent(type="message", message="I didn't hear anything. Try again when you're ready."),
                     )
-                    status_state = apply_worker_event(
-                        status_state, WorkerEvent(type="idle")
-                    )
+                    status_state = apply_worker_event(status_state, WorkerEvent(type="idle"))
                     continue
+
                 wav_bytes = audio_utils.pcm16_to_wav_bytes(
                     pcm_bytes,
                     config=audio_utils.AudioConfig(
-                        sample_rate=config.DEFAULT_AUDIO_SAMPLE_RATE,
-                        channels=config.DEFAULT_AUDIO_CHANNELS,
-                        sample_width=config.DEFAULT_AUDIO_SAMPLE_WIDTH,
+                        sample_rate=cap_cfg.sample_rate,
+                        channels=cap_cfg.channels,
+                        sample_width=cap_cfg.sample_width,
                     ),
                 )
-                job_queue.submit_audio(wav_bytes)
+
+                capture_id = str(int(time.time() * 1000))
+                job_queue.submit_audio(wav_bytes, debug_stt=args.debug_stt, capture_id=capture_id)
 
         if recording:
             recorder.poll()
@@ -330,19 +499,25 @@ def main() -> None:
             while True:
                 worker_event = job_queue.events.get_nowait()
                 status_state = apply_worker_event(status_state, worker_event)
+
                 if worker_event.type == "tts_audio" and worker_event.audio_bytes:
                     pending_audio_path = audio_utils.write_audio_bytes_to_temp_file(
                         worker_event.audio_bytes, suffix=f".{args.tts_format}"
                     )
-                    pygame.mixer.music.load(str(pending_audio_path))
-                    pygame.mixer.music.play()
-                    status_state = apply_worker_event(
-                        status_state, WorkerEvent(type="speaking")
-                    )
+                    if pygame.mixer.get_init() is not None:
+                        pygame.mixer.music.load(str(pending_audio_path))
+                        pygame.mixer.music.play()
+                        status_state = apply_worker_event(status_state, WorkerEvent(type="speaking"))
+                    else:
+                        log.warning("Mixer not initialized; cannot play TTS audio")
         except queue.Empty:
             pass
 
-        if status_state.status == STATUS_SPEAKING and not pygame.mixer.music.get_busy():
+        if (
+            status_state.status == STATUS_SPEAKING
+            and pygame.mixer.get_init() is not None
+            and not pygame.mixer.music.get_busy()
+        ):
             status_state = apply_worker_event(status_state, WorkerEvent(type="idle"))
 
         screen.fill((20, 20, 28))
