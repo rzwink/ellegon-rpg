@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/ellegon-campaign.schema.json",
+  "title": "Ellegon Campaign Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "recommended_age",
+    "campaign_overview",
+    "starting_state",
+    "acts",
+    "locations",
+    "npcs",
+    "rewards",
+    "dm_guidance"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9_\\-]+$",
+      "description": "Folder-friendly campaign identifier, used as the campaign directory name."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recommended_age": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 18
+    },
+
+    "campaign_overview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["theme", "goal", "completion_condition", "estimated_sessions"],
+      "properties": {
+        "theme": { "type": "string", "minLength": 1 },
+        "tone_description": { "type": "string" },
+        "goal": { "type": "string", "minLength": 1 },
+        "completion_condition": { "type": "string", "minLength": 1 },
+        "estimated_sessions": { "type": "integer", "minimum": 1, "maximum": 50 },
+        "intended_length_minutes": { "type": "integer", "minimum": 5, "maximum": 600 },
+        "player_experience_goals": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      }
+    },
+
+    "starting_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["location", "hit_points", "inventory", "currency", "known_facts"],
+      "properties": {
+        "location": { "type": "string", "minLength": 1 },
+        "location_description": { "type": "string" },
+        "hit_points": { "type": "integer", "minimum": 1, "maximum": 999 },
+        "inventory": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 0
+        },
+        "currency": { "$ref": "#/$defs/currency" },
+        "known_facts": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 0
+        },
+        "starting_expectation_for_dm": { "type": "string" }
+      }
+    },
+
+    "acts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/act" }
+    },
+
+    "locations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/location" }
+    },
+
+    "npcs": {
+      "type": "array",
+      "minItems": 0,
+      "items": { "$ref": "#/$defs/npc" }
+    },
+
+    "rewards": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["completion_rewards"],
+      "properties": {
+        "completion_rewards": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["currency", "items", "story_reward"],
+          "properties": {
+            "currency": { "$ref": "#/$defs/currency" },
+            "items": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "minItems": 0
+            },
+            "story_reward": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+
+    "dm_guidance": {
+      "description": "Either a simple string guidance or a structured object.",
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tone", "rules", "completion_behavior"],
+          "properties": {
+            "tone": { "type": "string", "minLength": 1 },
+            "rules": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "minItems": 0
+            },
+            "completion_behavior": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    }
+  },
+
+  "$defs": {
+    "currency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bronze", "silver", "gold", "platinum"],
+      "properties": {
+        "bronze": { "type": "integer", "minimum": 0 },
+        "silver": { "type": "integer", "minimum": 0 },
+        "gold": { "type": "integer", "minimum": 0 },
+        "platinum": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "act": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "purpose",
+        "key_elements",
+        "success_condition",
+        "failure_guidance"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^act_[a-z0-9_\\-]+$"
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "purpose": { "type": "string", "minLength": 1 },
+        "narrative_summary": { "type": "string" },
+        "key_elements": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        },
+        "possible_player_actions": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 0
+        },
+        "success_condition": { "type": "string", "minLength": 1 },
+        "failure_guidance": { "type": "string", "minLength": 1 },
+        "dm_notes": { "type": "string" }
+      }
+    },
+
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9_\\-]+$"
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "danger_level": {
+          "type": "string",
+          "enum": ["Low", "Medium", "High"]
+        },
+        "notable_features": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 0
+        }
+      }
+    },
+
+    "npc": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "name", "role"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9_\\-]+$"
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "personality": { "type": "string" },
+        "motivation": { "type": "string" },
+        "hit_points": { "type": "integer", "minimum": 0, "maximum": 999 },
+        "can_be_fought": { "type": "boolean" },
+        "can_be_talked_to": { "type": "boolean" },
+        "can_give_hints": { "type": "boolean" },
+        "possible_dialogue_hooks": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 0
+        }
+      }
+    }
+  }
+}

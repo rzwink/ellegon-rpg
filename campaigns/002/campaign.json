@@ -1,0 +1,193 @@
+{
+  "id": "flames_of_the_sky_realms",
+  "title": "The Flames of the Sky Realms",
+  "recommended_age": 10,
+
+  "campaign_overview": {
+    "theme": "A heroic dragon adventure about destiny, friendship, and choosing your own path.",
+    "tone_description": "Epic but gentle. The world feels large and magical, but danger is never cruel or hopeless. Bravery and kindness matter more than strength.",
+    "goal": "Uncover the truth behind a growing conflict between dragon tribes and prevent a war that would devastate the Sky Realms.",
+    "completion_condition": "The hero helps reveal the truth behind the conflict and brings peace, understanding, or a lasting truce between the tribes.",
+    "estimated_sessions": 1,
+    "intended_length_minutes": 40,
+    "player_experience_goals": [
+      "Feel powerful but responsible",
+      "Explore a world of flying dragons",
+      "Make meaningful moral choices",
+      "Learn that destiny can be shaped"
+    ]
+  },
+
+  "starting_state": {
+    "location": "High mountain ledge overlooking the Sky Realms",
+    "location_description": "A wide stone ledge clings to the side of a towering mountain. Far below, clouds drift over forests, deserts, oceans, and icy lands. Dragons of many colors soar through the sky.",
+    "hit_points": 12,
+    "inventory": [],
+    "currency": {
+      "bronze": 0,
+      "silver": 0,
+      "gold": 0,
+      "platinum": 0
+    },
+    "known_facts": [
+      "Dragon tribes rule different parts of the Sky Realms",
+      "Tension between the tribes is growing",
+      "Strange signs have appeared in the sky"
+    ],
+    "starting_expectation_for_dm": "Begin with wonder and scale. Let the player feel the joy of flight and being a dragon."
+  },
+
+  "acts": [
+    {
+      "id": "act_1",
+      "title": "A Sign in the Sky",
+      "purpose": "Introduce the dragon world and the central mystery.",
+      "narrative_summary": "A strange light appears in the sky, seen by dragons across the realms. Some believe it is an omen of war. Others believe it is a call for peace.",
+      "key_elements": [
+        "A glowing symbol in the clouds",
+        "Dragons arguing about its meaning",
+        "A messenger seeking brave heroes"
+      ],
+      "possible_player_actions": [
+        "Fly closer to investigate the sign",
+        "Talk to other dragons",
+        "Ignore the sign and explore",
+        "Volunteer to help as a messenger"
+      ],
+      "success_condition": "The hero agrees to investigate the meaning of the sky sign.",
+      "failure_guidance": "If the hero hesitates, introduce a friendly elder dragon who explains why the sign matters.",
+      "dm_notes": "Emphasize mystery and curiosity rather than danger."
+    },
+    {
+      "id": "act_2",
+      "title": "The Divided Tribes",
+      "purpose": "Show the consequences of misunderstanding and fear.",
+      "narrative_summary": "The hero travels between different dragon lands and sees how fear is spreading. Each tribe believes the others are preparing for war.",
+      "key_elements": [
+        "An icy cliff ruled by frost dragons",
+        "A scorching desert ruled by sand dragons",
+        "A stormy sea ruled by wave dragons"
+      ],
+      "possible_player_actions": [
+        "Listen to each tribe’s fears",
+        "Look for evidence of who started the rumors",
+        "Calm angry dragons",
+        "Sneak into forbidden places"
+      ],
+      "success_condition": "The hero discovers that the conflict is being fueled by lies or misunderstandings.",
+      "failure_guidance": "If the hero fails a roll, allow them to escape or learn partial information.",
+      "dm_notes": "Avoid villains at this stage. Focus on fear and confusion."
+    },
+    {
+      "id": "act_3",
+      "title": "Choosing the Future",
+      "purpose": "Resolve the conflict and give the hero a defining choice.",
+      "narrative_summary": "The truth is revealed. The hero must decide how to present it and what future the Sky Realms will follow.",
+      "key_elements": [
+        "A gathering of dragon leaders",
+        "The truth behind the sky sign",
+        "A choice between force or peace"
+      ],
+      "possible_player_actions": [
+        "Reveal the truth publicly",
+        "Convince leaders one by one",
+        "Challenge a warmonger dragon",
+        "Propose a new alliance"
+      ],
+      "success_condition": "The hero prevents war and shapes a peaceful future for the Sky Realms.",
+      "failure_guidance": "If negotiations fail, allow one last bold or clever action.",
+      "dm_notes": "Make the ending feel earned and hopeful."
+    }
+  ],
+
+  "locations": [
+    {
+      "id": "sky_ledge",
+      "name": "Sky Ledge",
+      "description": "A high mountain ledge where young dragons learn to fly and watch the world below.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Strong winds",
+        "Wide open skies",
+        "View of all dragon lands"
+      ]
+    },
+    {
+      "id": "frost_cliffs",
+      "name": "Frost Cliffs",
+      "description": "Tall icy cliffs where frost dragons carve their homes from ice.",
+      "danger_level": "Medium",
+      "notable_features": [
+        "Slippery ice",
+        "Freezing winds",
+        "Crystal ice caves"
+      ]
+    },
+    {
+      "id": "ember_desert",
+      "name": "Ember Desert",
+      "description": "A vast desert of red sand and stone where heat shimmers in the air.",
+      "danger_level": "Medium",
+      "notable_features": [
+        "Sandstorms",
+        "Hidden oases",
+        "Ancient ruins"
+      ]
+    }
+  ],
+
+  "npcs": [
+    {
+      "id": "elder_skydrake",
+      "name": "Aurelion",
+      "role": "Elder dragon",
+      "personality": "Wise, calm, and thoughtful",
+      "motivation": "Wants to prevent history from repeating itself",
+      "can_be_talked_to": true,
+      "can_give_hints": true,
+      "possible_dialogue_hooks": [
+        "Speaks of past dragon wars",
+        "Warns about fear controlling decisions"
+      ]
+    },
+    {
+      "id": "hotheaded_dragon",
+      "name": "Pyrris",
+      "role": "Aggressive dragon leader",
+      "personality": "Proud and quick to anger",
+      "motivation": "Believes war is the only solution",
+      "can_be_fought": true,
+      "can_be_talked_to": true,
+      "possible_dialogue_hooks": [
+        "Challenges the hero",
+        "Mocks peace as weakness"
+      ]
+    }
+  ],
+
+  "rewards": {
+    "completion_rewards": {
+      "currency": {
+        "bronze": 0,
+        "silver": 0,
+        "gold": 0,
+        "platinum": 0
+      },
+      "items": [
+        "Mark of the Sky Realms"
+      ],
+      "story_reward": "The hero becomes known as a dragon who changed the fate of the Sky Realms."
+    }
+  },
+
+  "dm_guidance": {
+    "tone": "Epic, hopeful, and encouraging.",
+    "rules": [
+      "Let flight feel exciting and free.",
+      "Use dice rolls for risky flying, persuasion, or daring stunts.",
+      "Reward peaceful solutions generously.",
+      "Keep combat brief and non-graphic."
+    ],
+    "completion_behavior": "When peace is secured, describe the skies clearing, dragons flying together, and clearly state that the adventure is complete."
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "id": "goblin_cave",
+  "title": "The Goblin Cave",
+  "recommended_age": 10,
+
+  "campaign_overview": {
+    "theme": "A lighthearted fantasy adventure centered on bravery, curiosity, and clever choices rather than raw strength.",
+    "tone_description": "The story should feel like a classic bedtime adventure. There is mystery and mild danger, but nothing frightening or hopeless. Humor, kindness, and clever thinking are rewarded.",
+    "goal": "Discover what is happening in the goblin cave near the forest path and take action so the forest becomes safe for travelers and villagers again.",
+    "completion_condition": "The adventure is considered complete when the goblin leader is defeated, driven away, convinced to leave peacefully, or otherwise prevented from threatening the forest. The cave must no longer pose a danger to travelers.",
+    "estimated_sessions": 1,
+    "intended_length_minutes": 30,
+    "player_experience_goals": [
+      "Feel like a hero making meaningful choices",
+      "Practice problem solving and imagination",
+      "Experience success even after setbacks",
+      "Understand that conflicts can be resolved in multiple ways"
+    ]
+  },
+
+  "starting_state": {
+    "location": "Forest path outside a dark cave",
+    "location_description": "A narrow dirt path winds through tall trees. Moss covers stones along the trail. Birds chirp above, but the cave ahead feels quiet and watchful.",
+    "hit_points": 10,
+    "inventory": [],
+    "currency": {
+      "bronze": 25,
+      "silver": 0,
+      "gold": 0,
+      "platinum": 0
+    },
+    "known_facts": [
+      "Villagers are nervous about the cave",
+      "Goblins have been seen nearby recently"
+    ],
+    "starting_expectation_for_dm": "Begin calmly and descriptively. Allow the player time to imagine their hero and surroundings before introducing danger."
+  },
+
+  "acts": [
+    {
+      "id": "act_1",
+      "title": "The Forest Path",
+      "purpose": "Introduce the setting, establish mood, and give the hero a sense of choice and agency.",
+      "narrative_summary": "The hero stands at the edge of a forest path leading to a dark cave. Signs of goblin activity are subtle but noticeable. This act focuses on curiosity and preparation rather than danger.",
+      "key_elements": [
+        "A wooden warning sign that looks old and scratched",
+        "The dark cave entrance partially hidden by vines",
+        "Strange forest sounds that stop suddenly",
+        "Footprints or markings near the cave"
+      ],
+      "possible_player_actions": [
+        "Inspect the warning sign",
+        "Look for tracks",
+        "Listen carefully",
+        "Approach the cave carefully",
+        "Decide to prepare or think before entering"
+      ],
+      "success_condition": "The hero chooses to approach the cave, scout it, or enter it in some way.",
+      "failure_guidance": "If the hero is unsure or hesitant, introduce a safe discovery such as finding a dropped coin, seeing a friendly animal, or noticing something interesting near the cave to encourage progress.",
+      "dm_notes": "Avoid forcing the hero forward. Let curiosity pull them in."
+    },
+    {
+      "id": "act_2",
+      "title": "Inside the Cave",
+      "purpose": "Encourage exploration, light problem solving, and interaction with goblins or cave features.",
+      "narrative_summary": "Inside the cave, the hero encounters dim tunnels, strange noises, and signs that goblins live here. The danger is real but manageable.",
+      "key_elements": [
+        "A forked tunnel with different sounds coming from each side",
+        "Crude goblin drawings on the walls",
+        "A small hidden stash of coins or items",
+        "Distant goblin chatter"
+      ],
+      "possible_player_actions": [
+        "Choose which tunnel to explore",
+        "Sneak quietly",
+        "Call out or announce their presence",
+        "Look for treasure",
+        "Set a trap or clever distraction"
+      ],
+      "success_condition": "The hero reaches the main goblin area or encounters goblins directly.",
+      "failure_guidance": "If the hero fails a roll or makes a mistake, allow them to recover. They might stumble but not be seriously hurt, or alert goblins who react with curiosity rather than immediate violence.",
+      "dm_notes": "Use dice rolls to add excitement, not punishment."
+    },
+    {
+      "id": "act_3",
+      "title": "The Goblin Leader",
+      "purpose": "Provide a clear climax and a meaningful resolution choice.",
+      "narrative_summary": "The hero meets the goblin leader, who is the source of the trouble. The hero must decide how to resolve the situation.",
+      "key_elements": [
+        "The goblin leader’s chamber",
+        "A throne made of crates and bones",
+        "Treasure gathered from travelers",
+        "The goblin leader’s attitude and motivation"
+      ],
+      "possible_player_actions": [
+        "Fight the goblin leader",
+        "Trick the goblin leader",
+        "Talk and negotiate",
+        "Offer help or a deal",
+        "Scare the goblin leader away"
+      ],
+      "success_condition": "The goblin leader is no longer a threat, through defeat, retreat, or agreement.",
+      "failure_guidance": "If the hero fails, the goblin leader may gloat, make demands, or allow another attempt. Do not end the story abruptly.",
+      "dm_notes": "Emphasize choice. There is no single correct solution."
+    }
+  ],
+
+  "locations": [
+    {
+      "id": "forest_path",
+      "name": "Forest Path",
+      "description": "A mossy trail leading through tall trees toward the cave. The air smells of pine and damp earth.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Warning sign",
+        "Animal tracks",
+        "View of the cave entrance"
+      ]
+    },
+    {
+      "id": "cave_entrance",
+      "name": "Cave Entrance",
+      "description": "A dark opening in the hillside with scratch marks around it. Cold air flows from inside.",
+      "danger_level": "Medium",
+      "notable_features": [
+        "Loose stones",
+        "Faint goblin noises",
+        "Torch marks"
+      ]
+    },
+    {
+      "id": "goblin_chamber",
+      "name": "Goblin Chamber",
+      "description": "A torch lit cavern cluttered with crates, bones, and stolen goods. This is where the goblin leader rules.",
+      "danger_level": "High",
+      "notable_features": [
+        "Goblin throne",
+        "Treasure pile",
+        "Multiple exits"
+      ]
+    }
+  ],
+
+  "npcs": [
+    {
+      "id": "goblin_leader",
+      "name": "Gribnak",
+      "role": "Goblin leader",
+      "personality": "Grumpy, loud, and proud, but not truly evil. Wants respect and safety for his goblins.",
+      "motivation": "Protect his group and prove he is a strong leader.",
+      "hit_points": 6,
+      "can_be_fought": true,
+      "can_be_talked_to": true,
+      "possible_dialogue_hooks": [
+        "Complains about villagers",
+        "Brags about his strength",
+        "Admits fear of something deeper in the cave"
+      ]
+    },
+    {
+      "id": "forest_traveler",
+      "name": "Old Rowan",
+      "role": "Helpful traveler",
+      "personality": "Kind, cautious, and talkative.",
+      "motivation": "Wants the road to be safe again.",
+      "can_give_hints": true,
+      "possible_dialogue_hooks": [
+        "Warns about goblins",
+        "Offers advice",
+        "Thanks the hero for helping"
+      ]
+    }
+  ],
+
+  "rewards": {
+    "completion_rewards": {
+      "currency": {
+        "bronze": 0,
+        "silver": 5,
+        "gold": 1,
+        "platinum": 0
+      },
+      "items": [
+        "Small healing potion"
+      ],
+      "story_reward": "The forest becomes peaceful again. Villagers thank the hero, and stories of their bravery begin to spread."
+    }
+  },
+
+  "dm_guidance": {
+    "tone": "Playful, adventurous, and encouraging.",
+    "rules": [
+      "Offer clear choices often.",
+      "Prompt dice rolls when actions are risky.",
+      "Allow creative solutions to succeed even if unexpected.",
+      "Never trap the hero in failure.",
+      "Guide the story toward a clear ending."
+    ],
+    "completion_behavior": "When the completion condition is met, clearly narrate the ending, describe the rewards, celebrate the hero’s actions, and explicitly state that the adventure is complete."
+  }
+}
