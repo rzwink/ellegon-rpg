@@ -1,0 +1,55 @@
+{
+  "id": "test_campaign",
+  "title": "Test Campaign",
+  "recommended_age": 10,
+  "intro": "Welcome to the test campaign.",
+  "campaign_overview": {
+    "theme": "Testing",
+    "goal": "Validate the loader",
+    "completion_condition": "The test is complete",
+    "estimated_sessions": 1
+  },
+  "starting_state": {
+    "location": "test_village",
+    "hit_points": 10,
+    "inventory": [],
+    "currency": {
+      "bronze": 0,
+      "silver": 0,
+      "gold": 0,
+      "platinum": 0
+    },
+    "known_facts": []
+  },
+  "acts": [
+    {
+      "id": "act_intro",
+      "title": "Intro",
+      "purpose": "Start",
+      "key_elements": ["Begin"],
+      "success_condition": "Players agree",
+      "failure_guidance": "Try again"
+    }
+  ],
+  "locations": [
+    {
+      "id": "test_village",
+      "name": "Test Village",
+      "description": "A place for tests"
+    }
+  ],
+  "npcs": [],
+  "rewards": {
+    "completion_rewards": {
+      "currency": {
+        "bronze": 1,
+        "silver": 0,
+        "gold": 0,
+        "platinum": 0
+      },
+      "items": [],
+      "story_reward": "You passed!"
+    }
+  },
+  "dm_guidance": "Be kind."
+}
