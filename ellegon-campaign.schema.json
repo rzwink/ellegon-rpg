@@ -135,6 +135,21 @@
           }
         }
       ]
+    },
+    "intro": {
+      "description": "Optional campaign intro. Either plain text or a structured object.",
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["text", "read_aloud"],
+          "properties": {
+            "text": { "type": "string", "minLength": 1 },
+            "read_aloud": { "type": "boolean" }
+          }
+        }
+      ]
     }
   },
 
