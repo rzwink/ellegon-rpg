@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import audioop
 import hashlib
 import io
 import logging
@@ -70,6 +71,20 @@ def _wav_info(wav_bytes: bytes) -> str:
         nframes = wf.getnframes()
         dur = nframes / float(sr) if sr else 0.0
     return f"wav(ch={ch}, sr={sr}, sw={sw}, frames={nframes}, dur={dur:.2f}s)"
+
+
+def _pcm_rms(pcm_bytes: bytes, *, sample_width: int) -> int:
+    if not pcm_bytes:
+        return 0
+    return audioop.rms(pcm_bytes, sample_width)
+
+
+def _pcm_duration_seconds(pcm_bytes: bytes, *, sample_rate: int, channels: int, sample_width: int) -> float:
+    frame_size = channels * sample_width
+    if frame_size <= 0 or sample_rate <= 0:
+        return 0.0
+    frames = len(pcm_bytes) / frame_size
+    return frames / float(sample_rate)
 
 
 @dataclass(frozen=True)
@@ -302,34 +317,52 @@ class PygameAudioRecorder:
         self._frames: list[bytes] = []
         self._recording = False
         self._lock = threading.Lock()
-
-        chosen = device_name or self._choose_capture_device_name()
-        if not isinstance(chosen, str):
-            chosen = str(chosen or "")
-
+        self._device, chosen = self._open_device(device_name=device_name)
         log.info("Using capture device: %r", chosen)
         log.debug("Capture cfg: sr=%s ch=%s chunk=%s", cfg.sample_rate, cfg.channels, cfg.chunk_size)
 
-        try:
-            self._device = sdl2_audio.AudioDevice(
-                chosen,
-                1,
-                cfg.sample_rate,
-                sdl2_audio.AUDIO_S16,
-                cfg.channels,
-                cfg.chunk_size,
-                0,
-                self._callback,
-            )
-        except Exception as exc:
-            names = self._safe_device_list()
-            raise RuntimeError(
-                "Unable to open a microphone capture device via pygame SDL2.\n"
-                f"Tried device_name={chosen!r}\n"
-                f"Capture devices visible to SDL2: {names}\n"
-            ) from exc
-
         self._device.pause(True)
+
+    def _open_device(self, *, device_name: Optional[str]) -> tuple[object, str]:
+        attempts: list[str] = []
+        errors: list[str] = []
+        names = self._safe_device_list()
+        candidates: list[str] = []
+        if device_name:
+            candidates.append(device_name)
+        preferred = self._choose_capture_device_name()
+        if preferred:
+            candidates.append(preferred)
+        if "" not in candidates:
+            candidates.append("")
+        for name in names:
+            if name not in candidates:
+                candidates.append(name)
+
+        for candidate in candidates:
+            chosen = str(candidate or "")
+            attempts.append(chosen)
+            try:
+                device = self._audio.AudioDevice(
+                    chosen,
+                    1,
+                    self._cfg.sample_rate,
+                    self._audio.AUDIO_S16,
+                    self._cfg.channels,
+                    self._cfg.chunk_size,
+                    0,
+                    self._callback,
+                )
+                return device, chosen
+            except Exception as exc:
+                errors.append(f"{chosen or '<default>'}: {exc}")
+
+        raise RuntimeError(
+            "Unable to open a microphone capture device via pygame SDL2.\n"
+            f"Tried devices: {attempts}\n"
+            f"Capture devices visible to SDL2: {names}\n"
+            f"Errors: {errors}\n"
+        )
 
     def _safe_device_list(self) -> list[str]:
         try:
@@ -368,7 +401,13 @@ class PygameAudioRecorder:
         self._device.pause(True)
         self._recording = False
         with self._lock:
-            return b"".join(self._frames)
+            pcm = b"".join(self._frames)
+        frame_size = self._cfg.channels * self._cfg.sample_width
+        if frame_size and len(pcm) % frame_size != 0:
+            trim = len(pcm) - (len(pcm) % frame_size)
+            log.debug("Trimming pcm bytes from %d to %d for frame alignment", len(pcm), trim)
+            pcm = pcm[:trim]
+        return pcm
 
     def poll(self) -> None:
         return
@@ -437,7 +476,12 @@ def main() -> None:
         status_state.message = warning
 
     cap_cfg = default_audio_capture_config()
-    recorder = PygameAudioRecorder(cap_cfg)
+    recorder: Optional[PygameAudioRecorder] = None
+    try:
+        recorder = PygameAudioRecorder(cap_cfg)
+    except RuntimeError as exc:
+        log.error("Audio capture unavailable: %s", exc)
+        status_state = apply_worker_event(status_state, WorkerEvent(type="error", message=str(exc)))
 
     job_queue = JobQueue(
         engine=engine,
@@ -461,20 +505,55 @@ def main() -> None:
                 running = False
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and not recording:
-                recording = True
-                recorder.start()
-                status_state = apply_worker_event(status_state, WorkerEvent(type="listening"))
-                log.debug("Recording started")
+                if recorder is None:
+                    status_state = apply_worker_event(
+                        status_state,
+                        WorkerEvent(
+                            type="error",
+                            message="Audio capture device unavailable. Check your microphone and restart.",
+                        ),
+                    )
+                else:
+                    recording = True
+                    recorder.start()
+                    status_state = apply_worker_event(status_state, WorkerEvent(type="listening"))
+                    log.debug("Recording started")
 
             if event.type == pygame.KEYUP and event.key == pygame.K_SPACE and recording:
                 recording = False
-                pcm_bytes = recorder.stop()
+                pcm_bytes = recorder.stop() if recorder else b""
                 log.debug("Recording stopped pcm_bytes=%d", len(pcm_bytes))
 
-                if not pcm_bytes:
+                rms = _pcm_rms(pcm_bytes, sample_width=cap_cfg.sample_width)
+                duration = _pcm_duration_seconds(
+                    pcm_bytes,
+                    sample_rate=cap_cfg.sample_rate,
+                    channels=cap_cfg.channels,
+                    sample_width=cap_cfg.sample_width,
+                )
+                if not pcm_bytes or rms <= 0:
                     status_state = apply_worker_event(
                         status_state,
                         WorkerEvent(type="message", message="I didn't hear anything. Try again when you're ready."),
+                    )
+                    status_state = apply_worker_event(status_state, WorkerEvent(type="idle"))
+                    continue
+                if duration < 0.2:
+                    status_state = apply_worker_event(
+                        status_state,
+                        WorkerEvent(
+                            type="message", message="That was too quick. Hold SPACE a bit longer and try again."
+                        ),
+                    )
+                    status_state = apply_worker_event(status_state, WorkerEvent(type="idle"))
+                    continue
+                if rms < 150:
+                    status_state = apply_worker_event(
+                        status_state,
+                        WorkerEvent(
+                            type="message",
+                            message="Your microphone seems very quiet. Try speaking louder or check its gain.",
+                        ),
                     )
                     status_state = apply_worker_event(status_state, WorkerEvent(type="idle"))
                     continue
@@ -492,7 +571,8 @@ def main() -> None:
                 job_queue.submit_audio(wav_bytes, debug_stt=args.debug_stt, capture_id=capture_id)
 
         if recording:
-            recorder.poll()
+            if recorder is not None:
+                recorder.poll()
 
         try:
             while True:
