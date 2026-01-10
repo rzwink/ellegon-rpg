@@ -151,6 +151,8 @@ class Layout:
     transcript_height: int = 360
     footer_height: int = 96
     orb_panel_width: int = 170
+    transcript_padding: int = 20
+    transcript_line_height: int = 26
 
 
 class PygameUI:
@@ -289,11 +291,15 @@ class PygameUI:
         )
         self._draw_orb_panel(orb_rect, speaking=speaking, elapsed=elapsed)
         self._draw_panel(text_rect)
-        y_offset = text_rect.y + 20
+        total_height = len(transcript_lines) * self.layout.transcript_line_height
+        y_offset = max(
+            text_rect.y + self.layout.transcript_padding,
+            text_rect.bottom - self.layout.transcript_padding - total_height,
+        )
         for line in transcript_lines:
             line_surface = self.small_font.render(line, True, self.theme.text)
             self.screen.blit(line_surface, (text_rect.x + 22, y_offset))
-            y_offset += 26
+            y_offset += self.layout.transcript_line_height
 
     def _draw_footer(self, status_state: JobQueueState, elapsed: float) -> None:
         footer_rect = pygame.Rect(
@@ -342,7 +348,7 @@ def apply_worker_event(state: JobQueueState, event: WorkerEvent) -> JobQueueStat
 
 
 def format_transcript_lines(
-    transcript: Iterable[tuple[str, str]], *, max_lines: int = 8, line_width: int = 64
+    transcript: Iterable[tuple[str, str]], *, max_lines: int, line_width: int = 64
 ) -> list[str]:
     lines: list[str] = []
     for speaker, text in transcript:
@@ -352,6 +358,11 @@ def format_transcript_lines(
             for continuation in wrapped[1:]:
                 lines.append(f"  {continuation}")
     return lines[-max_lines:]
+
+
+def calculate_transcript_lines(layout: Layout) -> int:
+    available_height = layout.transcript_height - layout.transcript_padding * 2
+    return max(1, available_height // layout.transcript_line_height)
 
 
 @dataclass
@@ -782,7 +793,8 @@ def main() -> None:
             pass
 
         elapsed = pygame.time.get_ticks() / 1000.0
-        lines = format_transcript_lines(status_state.transcript, max_lines=14, line_width=70)
+        max_lines = calculate_transcript_lines(ui.layout)
+        lines = format_transcript_lines(status_state.transcript, max_lines=max_lines, line_width=70)
         ui.render(status_state, lines, elapsed=elapsed)
         pygame.display.flip()
         clock.tick(30)
