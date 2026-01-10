@@ -8,6 +8,7 @@ import logging
 import math
 import os
 import queue
+import random
 import textwrap
 import threading
 import time
@@ -144,15 +145,20 @@ class JobQueueState:
 
 @dataclass
 class Layout:
-    width: int = 900
-    height: int = 600
+    width: int = 1100
+    height: int = 720
     padding: int = 24
     header_height: int = 92
-    transcript_height: int = 360
-    footer_height: int = 96
+    transcript_height: int = 512
     orb_panel_width: int = 170
     transcript_padding: int = 20
     transcript_line_height: int = 26
+
+
+@dataclass
+class DiceState:
+    last_roll: Optional[int] = None
+    last_sides: Optional[int] = None
 
 
 class PygameUI:
@@ -174,13 +180,47 @@ class PygameUI:
         pygame.draw.rect(self.screen, self.theme.panel, rect, border_radius=18)
         pygame.draw.rect(self.screen, self.theme.panel_outline, rect, width=2, border_radius=18)
 
-    def _draw_header(self, status_state: JobQueueState, elapsed: float) -> None:
-        header_rect = pygame.Rect(
+    def _header_rect(self) -> pygame.Rect:
+        return pygame.Rect(
             self.layout.padding,
             self.layout.padding,
             self.layout.width - self.layout.padding * 2,
             self.layout.header_height,
         )
+
+    def dice_button_rects(self) -> dict[str, pygame.Rect]:
+        header_rect = self._header_rect()
+        button_height = 30
+        button_width = 92
+        gap = 10
+        total_width = button_width * 2 + gap
+        x = header_rect.right - total_width - 24
+        y = header_rect.y + 16
+        return {
+            "d6": pygame.Rect(x, y, button_width, button_height),
+            "d20": pygame.Rect(x + button_width + gap, y, button_width, button_height),
+        }
+
+    def _draw_button(self, rect: pygame.Rect, label: str) -> None:
+        pygame.draw.rect(self.screen, self.theme.panel_outline, rect, border_radius=10)
+        inner_rect = rect.inflate(-2, -2)
+        pygame.draw.rect(self.screen, self.theme.panel, inner_rect, border_radius=9)
+        label_surface = self.small_font.render(label, True, self.theme.text)
+        self.screen.blit(
+            label_surface,
+            (
+                rect.centerx - label_surface.get_width() // 2,
+                rect.centery - label_surface.get_height() // 2,
+            ),
+        )
+
+    def _dice_prompt(self, dice_state: DiceState) -> str:
+        if dice_state.last_roll is None or dice_state.last_sides is None:
+            return "Click a die to roll, then say the number aloud."
+        return f"Last roll: d{dice_state.last_sides} = {dice_state.last_roll} — say it aloud."
+
+    def _draw_header(self, status_state: JobQueueState, dice_state: DiceState, elapsed: float) -> None:
+        header_rect = self._header_rect()
         self._draw_panel(header_rect)
 
         title_surface = self.font.render(ELLEGON_TITLE, True, self.theme.text)
@@ -190,13 +230,20 @@ class PygameUI:
         status_surface = self.small_font.render(f"Status: {status_state.status}", True, status_color)
         self.screen.blit(status_surface, (header_rect.x + 24, header_rect.y + 54))
 
-        hint_surface = self.small_font.render("Hold SPACE to speak", True, self.theme.text_muted)
+        hint_surface = self.small_font.render("Press and hold SPACE to speak", True, self.theme.text_muted)
         hint_pos = (header_rect.right - hint_surface.get_width() - 24, header_rect.y + 54)
         self.screen.blit(hint_surface, hint_pos)
 
+        dice_prompt_surface = self.small_font.render(self._dice_prompt(dice_state), True, self.theme.text_muted)
+        self.screen.blit(dice_prompt_surface, (header_rect.x + 24, header_rect.y + 72))
+
+        dice_rects = self.dice_button_rects()
+        self._draw_button(dice_rects["d6"], "Roll d6")
+        self._draw_button(dice_rects["d20"], "Roll d20")
+
         if status_state.status in {STATUS_THINKING, STATUS_SPEAKING}:
             self._draw_orbiting_runes(
-                center=(header_rect.right - 120, header_rect.y + 32),
+                center=(dice_rects["d6"].x - 36, header_rect.y + 32),
                 elapsed=elapsed,
                 color=status_color,
             )
@@ -301,24 +348,19 @@ class PygameUI:
             self.screen.blit(line_surface, (text_rect.x + 22, y_offset))
             y_offset += self.layout.transcript_line_height
 
-    def _draw_footer(self, status_state: JobQueueState, elapsed: float) -> None:
-        footer_rect = pygame.Rect(
-            self.layout.padding,
-            self.layout.height - self.layout.footer_height - self.layout.padding,
-            self.layout.width - self.layout.padding * 2,
-            self.layout.footer_height,
-        )
-        self._draw_panel(footer_rect)
-        prompt_surface = self.small_font.render("Press SPACE and speak your intent", True, self.theme.text_muted)
-        self.screen.blit(prompt_surface, (footer_rect.x + 24, footer_rect.y + 32))
-
-    def render(self, status_state: JobQueueState, transcript_lines: list[str], *, elapsed: float) -> None:
+    def render(
+        self,
+        status_state: JobQueueState,
+        transcript_lines: list[str],
+        dice_state: DiceState,
+        *,
+        elapsed: float,
+    ) -> None:
         self.screen.blit(self._background_cache, (0, 0))
-        self._draw_header(status_state, elapsed)
+        self._draw_header(status_state, dice_state, elapsed)
         self._draw_message(status_state.message)
         speaking = status_state.status == STATUS_SPEAKING
         self._draw_transcript(transcript_lines, speaking=speaking, elapsed=elapsed)
-        self._draw_footer(status_state, elapsed)
 
 
 def apply_worker_event(state: JobQueueState, event: WorkerEvent) -> JobQueueState:
@@ -686,6 +728,7 @@ def main() -> None:
     status_state = JobQueueState()
     if warning:
         status_state.message = warning
+    dice_state = DiceState()
 
     cap_cfg = default_audio_capture_config()
     recorder: Optional[PygameAudioRecorder] = None
@@ -776,6 +819,15 @@ def main() -> None:
                 capture_id = str(int(time.time() * 1000))
                 job_queue.submit_audio(wav_bytes, debug_stt=args.debug_stt, capture_id=capture_id)
 
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                dice_rects = ui.dice_button_rects()
+                if dice_rects["d6"].collidepoint(event.pos):
+                    dice_state.last_sides = 6
+                    dice_state.last_roll = random.randint(1, 6)
+                elif dice_rects["d20"].collidepoint(event.pos):
+                    dice_state.last_sides = 20
+                    dice_state.last_roll = random.randint(1, 20)
+
         if recording and recorder is not None:
             recorder.poll()
 
@@ -795,7 +847,7 @@ def main() -> None:
         elapsed = pygame.time.get_ticks() / 1000.0
         max_lines = calculate_transcript_lines(ui.layout)
         lines = format_transcript_lines(status_state.transcript, max_lines=max_lines, line_width=70)
-        ui.render(status_state, lines, elapsed=elapsed)
+        ui.render(status_state, lines, dice_state, elapsed=elapsed)
         pygame.display.flip()
         clock.tick(30)
 
