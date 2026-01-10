@@ -150,6 +150,7 @@ class Layout:
     header_height: int = 92
     transcript_height: int = 360
     footer_height: int = 96
+    orb_panel_width: int = 170
 
 
 class PygameUI:
@@ -222,18 +223,76 @@ class PygameUI:
         message_surface = self.small_font.render(message, True, self.theme.warning)
         self.screen.blit(message_surface, (message_rect.x + 16, message_rect.y + 10))
 
-    def _draw_transcript(self, transcript_lines: list[str]) -> None:
+    def _blend(self, color_a: tuple[int, int, int], color_b: tuple[int, int, int], t: float) -> tuple[int, int, int]:
+        t = max(0.0, min(1.0, t))
+        return (
+            int(color_a[0] + (color_b[0] - color_a[0]) * t),
+            int(color_a[1] + (color_b[1] - color_a[1]) * t),
+            int(color_a[2] + (color_b[2] - color_a[2]) * t),
+        )
+
+    def _draw_orb_panel(self, rect: pygame.Rect, *, speaking: bool, elapsed: float) -> None:
+        self._draw_panel(rect)
+        orb_center = (rect.centerx, rect.y + 120)
+        base_color = self.theme.accent
+        pulse = 0.2
+        if speaking:
+            pulse = 0.4 + 0.6 * abs(math.sin(elapsed * 3.8))
+        glow_color = self._blend(self.theme.panel, base_color, pulse)
+        ring_color = self._blend(base_color, (255, 255, 255), pulse * 0.5)
+
+        pygame.draw.circle(self.screen, glow_color, orb_center, 58)
+        pygame.draw.circle(self.screen, ring_color, orb_center, 60, width=3)
+        pygame.draw.circle(self.screen, self._blend(base_color, (20, 18, 28), 0.3), orb_center, 46)
+        pygame.draw.circle(self.screen, self._blend(base_color, (10, 8, 20), 0.5), orb_center, 30)
+
+        label_surface = self.small_font.render("Crystal Focus", True, self.theme.text_muted)
+        self.screen.blit(label_surface, (rect.centerx - label_surface.get_width() // 2, rect.y + 200))
+
+        bar_area = pygame.Rect(rect.x + 18, rect.bottom - 64, rect.width - 36, 44)
+        bar_count = 8
+        bar_gap = 4
+        bar_width = (bar_area.width - (bar_count - 1) * bar_gap) // bar_count
+        for idx in range(bar_count):
+            phase = elapsed * 4.2 + idx * 0.6
+            wobble = 0.35 + 0.65 * (0.5 + 0.5 * math.sin(phase))
+            intensity = (0.2 + pulse * 0.8) if speaking else 0.15
+            height = int(bar_area.height * wobble * intensity)
+            x = bar_area.x + idx * (bar_width + bar_gap)
+            y = bar_area.bottom - height
+            bar_color = self._blend(self.theme.panel_outline, base_color, intensity)
+            pygame.draw.rect(
+                self.screen,
+                bar_color,
+                pygame.Rect(x, y, bar_width, height),
+                border_radius=6,
+            )
+
+    def _draw_transcript(self, transcript_lines: list[str], *, speaking: bool, elapsed: float) -> None:
         transcript_rect = pygame.Rect(
             self.layout.padding,
             self.layout.padding + self.layout.header_height + 68,
             self.layout.width - self.layout.padding * 2,
             self.layout.transcript_height,
         )
-        self._draw_panel(transcript_rect)
-        y_offset = transcript_rect.y + 20
+        orb_rect = pygame.Rect(
+            transcript_rect.x,
+            transcript_rect.y,
+            self.layout.orb_panel_width,
+            transcript_rect.height,
+        )
+        text_rect = pygame.Rect(
+            transcript_rect.x + self.layout.orb_panel_width + 12,
+            transcript_rect.y,
+            transcript_rect.width - self.layout.orb_panel_width - 12,
+            transcript_rect.height,
+        )
+        self._draw_orb_panel(orb_rect, speaking=speaking, elapsed=elapsed)
+        self._draw_panel(text_rect)
+        y_offset = text_rect.y + 20
         for line in transcript_lines:
             line_surface = self.small_font.render(line, True, self.theme.text)
-            self.screen.blit(line_surface, (transcript_rect.x + 22, y_offset))
+            self.screen.blit(line_surface, (text_rect.x + 22, y_offset))
             y_offset += 26
 
     def _draw_footer(self, status_state: JobQueueState, elapsed: float) -> None:
@@ -244,24 +303,15 @@ class PygameUI:
             self.layout.footer_height,
         )
         self._draw_panel(footer_rect)
-
-        accent = self.theme.status_colors.get(status_state.status, self.theme.accent)
-        pulse = 0.6 + 0.4 * math.sin(elapsed * 3.4)
-        pulse_width = int((footer_rect.width - 48) * max(0.2, pulse))
-        pygame.draw.rect(
-            self.screen,
-            accent,
-            pygame.Rect(footer_rect.x + 24, footer_rect.y + 22, pulse_width, 10),
-            border_radius=6,
-        )
         prompt_surface = self.small_font.render("Press SPACE and speak your intent", True, self.theme.text_muted)
-        self.screen.blit(prompt_surface, (footer_rect.x + 24, footer_rect.y + 40))
+        self.screen.blit(prompt_surface, (footer_rect.x + 24, footer_rect.y + 32))
 
     def render(self, status_state: JobQueueState, transcript_lines: list[str], *, elapsed: float) -> None:
         self.screen.blit(self._background_cache, (0, 0))
         self._draw_header(status_state, elapsed)
         self._draw_message(status_state.message)
-        self._draw_transcript(transcript_lines)
+        speaking = status_state.status == STATUS_SPEAKING
+        self._draw_transcript(transcript_lines, speaking=speaking, elapsed=elapsed)
         self._draw_footer(status_state, elapsed)
 
 
