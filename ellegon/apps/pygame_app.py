@@ -5,6 +5,7 @@ import audioop
 import hashlib
 import io
 import logging
+import math
 import os
 import queue
 import textwrap
@@ -17,6 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Deque, Iterable, Optional
 
+import pygame
 from dotenv import load_dotenv
 
 from ellegon import config
@@ -33,6 +35,26 @@ STATUS_THINKING = "Thinking"
 STATUS_SPEAKING = "Speaking"
 
 log = logging.getLogger("ellegon.pygame")
+
+ELLEGON_TITLE = "Ellegon"
+
+
+class Theme:
+    def __init__(self) -> None:
+        self.background = (16, 16, 26)
+        self.panel = (28, 26, 38)
+        self.panel_outline = (78, 72, 102)
+        self.text = (238, 235, 244)
+        self.text_muted = (168, 164, 186)
+        self.accent = (124, 217, 198)
+        self.warning = (246, 201, 125)
+        self.highlight = (255, 220, 140)
+        self.status_colors = {
+            STATUS_IDLE: (160, 160, 180),
+            STATUS_LISTENING: (124, 217, 198),
+            STATUS_THINKING: (255, 210, 140),
+            STATUS_SPEAKING: (170, 190, 255),
+        }
 
 
 def setup_logging(debug: bool) -> None:
@@ -118,6 +140,129 @@ class JobQueueState:
     status: str = STATUS_IDLE
     message: str = ""
     transcript: Deque[tuple[str, str]] = field(default_factory=deque)
+
+
+@dataclass
+class Layout:
+    width: int = 900
+    height: int = 600
+    padding: int = 24
+    header_height: int = 92
+    transcript_height: int = 360
+    footer_height: int = 96
+
+
+class PygameUI:
+    def __init__(self, screen, *, theme: Theme, layout: Layout, font, small_font) -> None:
+        self.screen = screen
+        self.theme = theme
+        self.layout = layout
+        self.font = font
+        self.small_font = small_font
+        self._background_cache = pygame.Surface((layout.width, layout.height))
+        self._draw_background()
+
+    def _draw_background(self) -> None:
+        for y in range(self.layout.height):
+            shade = 10 + int(26 * (y / self.layout.height))
+            self._background_cache.fill((shade, shade, shade + 6), rect=(0, y, self.layout.width, 1))
+
+    def _draw_panel(self, rect: pygame.Rect) -> None:
+        pygame.draw.rect(self.screen, self.theme.panel, rect, border_radius=18)
+        pygame.draw.rect(self.screen, self.theme.panel_outline, rect, width=2, border_radius=18)
+
+    def _draw_header(self, status_state: JobQueueState, elapsed: float) -> None:
+        header_rect = pygame.Rect(
+            self.layout.padding,
+            self.layout.padding,
+            self.layout.width - self.layout.padding * 2,
+            self.layout.header_height,
+        )
+        self._draw_panel(header_rect)
+
+        title_surface = self.font.render(ELLEGON_TITLE, True, self.theme.text)
+        self.screen.blit(title_surface, (header_rect.x + 22, header_rect.y + 18))
+
+        status_color = self.theme.status_colors.get(status_state.status, self.theme.text)
+        status_surface = self.small_font.render(f"Status: {status_state.status}", True, status_color)
+        self.screen.blit(status_surface, (header_rect.x + 24, header_rect.y + 54))
+
+        hint_surface = self.small_font.render("Hold SPACE to speak", True, self.theme.text_muted)
+        hint_pos = (header_rect.right - hint_surface.get_width() - 24, header_rect.y + 54)
+        self.screen.blit(hint_surface, hint_pos)
+
+        if status_state.status in {STATUS_THINKING, STATUS_SPEAKING}:
+            self._draw_orbiting_runes(
+                center=(header_rect.right - 120, header_rect.y + 32),
+                elapsed=elapsed,
+                color=status_color,
+            )
+
+    def _draw_orbiting_runes(self, *, center: tuple[int, int], elapsed: float, color: tuple[int, int, int]) -> None:
+        cx, cy = center
+        for idx in range(3):
+            angle = elapsed * 2.2 + idx * (math.tau / 3)
+            radius = 10 + idx * 6
+            x = cx + int(math.cos(angle) * radius)
+            y = cy + int(math.sin(angle) * radius)
+            pygame.draw.circle(self.screen, color, (x, y), 4)
+        pygame.draw.circle(self.screen, color, (cx, cy), 2)
+
+    def _draw_message(self, message: str) -> None:
+        if not message:
+            return
+        message_rect = pygame.Rect(
+            self.layout.padding,
+            self.layout.padding + self.layout.header_height + 12,
+            self.layout.width - self.layout.padding * 2,
+            42,
+        )
+        pygame.draw.rect(self.screen, (38, 36, 52), message_rect, border_radius=14)
+        pygame.draw.rect(self.screen, (86, 82, 110), message_rect, width=2, border_radius=14)
+        message_surface = self.small_font.render(message, True, self.theme.warning)
+        self.screen.blit(message_surface, (message_rect.x + 16, message_rect.y + 10))
+
+    def _draw_transcript(self, transcript_lines: list[str]) -> None:
+        transcript_rect = pygame.Rect(
+            self.layout.padding,
+            self.layout.padding + self.layout.header_height + 68,
+            self.layout.width - self.layout.padding * 2,
+            self.layout.transcript_height,
+        )
+        self._draw_panel(transcript_rect)
+        y_offset = transcript_rect.y + 20
+        for line in transcript_lines:
+            line_surface = self.small_font.render(line, True, self.theme.text)
+            self.screen.blit(line_surface, (transcript_rect.x + 22, y_offset))
+            y_offset += 26
+
+    def _draw_footer(self, status_state: JobQueueState, elapsed: float) -> None:
+        footer_rect = pygame.Rect(
+            self.layout.padding,
+            self.layout.height - self.layout.footer_height - self.layout.padding,
+            self.layout.width - self.layout.padding * 2,
+            self.layout.footer_height,
+        )
+        self._draw_panel(footer_rect)
+
+        accent = self.theme.status_colors.get(status_state.status, self.theme.accent)
+        pulse = 0.6 + 0.4 * math.sin(elapsed * 3.4)
+        pulse_width = int((footer_rect.width - 48) * max(0.2, pulse))
+        pygame.draw.rect(
+            self.screen,
+            accent,
+            pygame.Rect(footer_rect.x + 24, footer_rect.y + 22, pulse_width, 10),
+            border_radius=6,
+        )
+        prompt_surface = self.small_font.render("Press SPACE and speak your intent", True, self.theme.text_muted)
+        self.screen.blit(prompt_surface, (footer_rect.x + 24, footer_rect.y + 40))
+
+    def render(self, status_state: JobQueueState, transcript_lines: list[str], *, elapsed: float) -> None:
+        self.screen.blit(self._background_cache, (0, 0))
+        self._draw_header(status_state, elapsed)
+        self._draw_message(status_state.message)
+        self._draw_transcript(transcript_lines)
+        self._draw_footer(status_state, elapsed)
 
 
 def apply_worker_event(state: JobQueueState, event: WorkerEvent) -> JobQueueState:
@@ -427,8 +572,6 @@ def _ensure_api_key() -> None:
 
 
 def main() -> None:
-    import pygame
-
     parser = argparse.ArgumentParser(description="Ellegon Pygame Voice Client")
     parser.add_argument("--campaign", required=True, help="Campaign id (folder name under campaigns/)")
     parser.add_argument("--instance", required=True, help="Instance id for this playthrough (save file name)")
@@ -470,10 +613,14 @@ def main() -> None:
 
     pygame.init()
 
-    pygame.display.set_caption("Ellegon")
-    screen = pygame.display.set_mode((900, 600))
-    font = pygame.font.SysFont(None, 28)
+    layout = Layout()
+    pygame.display.set_caption(ELLEGON_TITLE)
+    screen = pygame.display.set_mode((layout.width, layout.height))
+    font = pygame.font.SysFont(None, 32)
+    small_font = pygame.font.SysFont(None, 24)
     clock = pygame.time.Clock()
+    theme = Theme()
+    ui = PygameUI(screen, theme=theme, layout=layout, font=font, small_font=small_font)
 
     status_state = JobQueueState()
     if warning:
@@ -584,24 +731,9 @@ def main() -> None:
         except queue.Empty:
             pass
 
-        screen.fill((20, 20, 28))
-        status_text = font.render(f"Status: {status_state.status}", True, (240, 240, 240))
-        screen.blit(status_text, (24, 20))
-
-        hint_text = font.render("Hold SPACE to talk", True, (180, 180, 180))
-        screen.blit(hint_text, (24, 54))
-
-        if status_state.message:
-            message_text = font.render(status_state.message, True, (255, 210, 120))
-            screen.blit(message_text, (24, 90))
-
+        elapsed = pygame.time.get_ticks() / 1000.0
         lines = format_transcript_lines(status_state.transcript, max_lines=14, line_width=70)
-        y_offset = 140
-        for line in lines:
-            line_surface = font.render(line, True, (220, 220, 220))
-            screen.blit(line_surface, (24, y_offset))
-            y_offset += 28
-
+        ui.render(status_state, lines, elapsed=elapsed)
         pygame.display.flip()
         clock.tick(30)
 
