@@ -278,3 +278,8 @@ For commercial licensing, partnerships, or questions:
 
 Rob Zwink
 Email: rzwink@gmail
+
+
+sudo apt-get update
+sudo apt-get install -y libportaudio2 portaudio19-dev
+pip install -U sounddevice

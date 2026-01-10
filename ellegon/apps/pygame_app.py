@@ -20,12 +20,12 @@ from typing import Deque, Iterable, Optional
 from dotenv import load_dotenv
 
 from ellegon import config
+from ellegon.apps.openai_audioplayer import OpenAILocalPCMPlayer
 from ellegon.llm.gateway import OpenAIGateway
 from ellegon.service.engine import Engine
 from ellegon.sessions.persistence import load_or_create_save
 from ellegon.speech import audio as audio_utils
 from ellegon.speech.stt import OpenAITranscriber, SpeechToText
-from ellegon.speech.tts import OpenAITTS, TextToSpeech
 
 STATUS_IDLE = "Idle"
 STATUS_LISTENING = "Listening"
@@ -79,7 +79,9 @@ def _pcm_rms(pcm_bytes: bytes, *, sample_width: int) -> int:
     return audioop.rms(pcm_bytes, sample_width)
 
 
-def _pcm_duration_seconds(pcm_bytes: bytes, *, sample_rate: int, channels: int, sample_width: int) -> float:
+def _pcm_duration_seconds(
+    pcm_bytes: bytes, *, sample_rate: int, channels: int, sample_width: int
+) -> float:
     frame_size = channels * sample_width
     if frame_size <= 0 or sample_rate <= 0:
         return 0.0
@@ -108,7 +110,6 @@ def default_audio_capture_config() -> AudioCaptureConfig:
 class WorkerEvent:
     type: str
     text: Optional[str] = None
-    audio_bytes: Optional[bytes] = None
     message: Optional[str] = None
 
 
@@ -123,6 +124,7 @@ def apply_worker_event(state: JobQueueState, event: WorkerEvent) -> JobQueueStat
     updated = JobQueueState(
         status=state.status, message=state.message, transcript=deque(state.transcript)
     )
+
     if event.type == "listening":
         updated.status = STATUS_LISTENING
     elif event.type == "thinking":
@@ -140,6 +142,7 @@ def apply_worker_event(state: JobQueueState, event: WorkerEvent) -> JobQueueStat
         updated.message = event.message or "Something went wrong. Please try again."
     elif event.type == "message" and event.message is not None:
         updated.message = event.message
+
     return updated
 
 
@@ -165,24 +168,27 @@ class WorkerTask:
 
 
 class JobQueue:
+    """
+    Worker thread:
+    - STT (wav bytes -> transcript)
+    - LLM response (transcript -> dm_text)
+    - Emits dm_text
+    No TTS bytes here. Playback is handled by OpenAILocalPCMPlayer in the UI thread.
+    """
+
     def __init__(
         self,
         *,
         engine: Engine,
         save: object,
         stt: SpeechToText,
-        tts: TextToSpeech,
         model_name: str,
-        tts_voice: str,
-        tts_format: str,
     ) -> None:
         self._engine = engine
         self._save = save
         self._stt = stt
-        self._tts = tts
         self._model_name = model_name
-        self._tts_voice = tts_voice
-        self._tts_format = tts_format
+
         self._tasks: queue.Queue[Optional[WorkerTask]] = queue.Queue()
         self._events: queue.Queue[WorkerEvent] = queue.Queue()
         self._thread = threading.Thread(target=self._run, daemon=True)
@@ -224,7 +230,7 @@ class JobQueue:
                 self._events.put(WorkerEvent(type="idle"))
                 return
             self._events.put(WorkerEvent(type="dm_text", text=dm_text))
-            self._emit_tts_audio(dm_text)
+            self._events.put(WorkerEvent(type="speaking"))
         except Exception as exc:
             log.exception("Starter handler failed")
             self._events.put(WorkerEvent(type="error", message=str(exc)))
@@ -287,116 +293,10 @@ class JobQueue:
 
             dm_text = self._engine.run_player_turn(self._save, transcript, self._model_name)
             self._events.put(WorkerEvent(type="dm_text", text=dm_text))
-            self._emit_tts_audio(dm_text)
+            self._events.put(WorkerEvent(type="speaking"))
         except Exception as exc:
             log.exception("Audio handler failed capture_id=%s", capture_id)
             self._events.put(WorkerEvent(type="error", message=str(exc)))
-
-    def _emit_tts_audio(self, dm_text: str) -> None:
-        self._events.put(WorkerEvent(type="speaking"))
-        if self._tts_format == "pcm":
-            for chunk in self._tts.stream_speech(
-                dm_text, voice=self._tts_voice, audio_format=self._tts_format
-            ):
-                if chunk:
-                    self._events.put(WorkerEvent(type="tts_audio_chunk", audio_bytes=chunk))
-            self._events.put(WorkerEvent(type="tts_audio_end"))
-            return
-        audio_bytes = self._tts.synthesize_speech(
-            dm_text, voice=self._tts_voice, audio_format=self._tts_format
-        )
-        self._events.put(WorkerEvent(type="tts_audio", audio_bytes=audio_bytes))
-
-
-class PCMStreamPlayer:
-    def __init__(
-        self,
-        *,
-        sample_rate: int,
-        channels: int,
-        sample_width: int,
-        chunk_duration: float = 0.25,
-    ) -> None:
-        self._sample_rate = sample_rate
-        self._channels = channels
-        self._sample_width = sample_width
-        self._frame_size = channels * sample_width
-        self._chunk_bytes = max(1, int(sample_rate * chunk_duration) * self._frame_size)
-        self._buffer = bytearray()
-        self._channel: Optional[object] = None
-        self._active = False
-        self._completed = False
-
-    @property
-    def completed(self) -> bool:
-        return self._completed
-
-    def start(self) -> None:
-        self._buffer.clear()
-        self._completed = False
-        self._active = True
-
-    def feed(self, pcm_bytes: bytes) -> None:
-        if not pcm_bytes:
-            return
-        if not self._active:
-            self.start()
-        self._buffer.extend(pcm_bytes)
-        self._flush_buffer()
-
-    def finalize(self) -> None:
-        self._flush_buffer(flush_all=True)
-        self._completed = True
-
-    def _flush_buffer(self, *, flush_all: bool = False) -> None:
-        if not self._buffer:
-            return
-        while self._buffer and (flush_all or len(self._buffer) >= self._chunk_bytes):
-            if flush_all:
-                chunk = bytes(self._buffer)
-                self._buffer.clear()
-            else:
-                chunk = bytes(self._buffer[: self._chunk_bytes])
-                del self._buffer[: self._chunk_bytes]
-            self._queue_chunk(chunk)
-
-    def _queue_chunk(self, chunk: bytes) -> None:
-        if not chunk or self._frame_size <= 0:
-            return
-        trim = len(chunk) - (len(chunk) % self._frame_size)
-        if trim <= 0:
-            return
-        chunk = chunk[:trim]
-        sound = self._make_sound(chunk)
-        if sound is None:
-            return
-        if self._channel is None:
-            import pygame
-
-            self._channel = pygame.mixer.find_channel() or pygame.mixer.Channel(0)
-        if self._channel.get_busy():
-            self._channel.queue(sound)
-        else:
-            self._channel.play(sound)
-
-    def _make_sound(self, chunk: bytes) -> Optional[object]:
-        try:
-            import pygame
-
-            return pygame.mixer.Sound(buffer=chunk)
-        except Exception as exc:
-            log.warning("Failed to create Sound chunk: %s", exc)
-            return None
-
-    def is_playing(self) -> bool:
-        if self._channel is None:
-            return False
-        return bool(self._channel.get_busy())
-
-    def reset(self) -> None:
-        self._buffer.clear()
-        self._active = False
-        self._completed = False
 
 
 class PygameAudioRecorder:
@@ -474,19 +374,16 @@ class PygameAudioRecorder:
         if not names:
             return ""
 
-        # Best choice first
         for name in names:
             lower = name.lower()
             if "digital microphone" in lower:
                 return name
 
-        # Avoid unplugged headphone mics
         for name in names:
             lower = name.lower()
             if "microphone" in lower and "headphone" not in lower:
                 return name
 
-        # Fallback
         return names[0]
 
     def _callback(self, audiodevice, audiomemoryview) -> None:
@@ -540,7 +437,6 @@ def main() -> None:
     parser.add_argument("--stt-model", default=config.DEFAULT_STT_MODEL, help="OpenAI STT model name")
     parser.add_argument("--tts-model", default=config.DEFAULT_TTS_MODEL, help="OpenAI TTS model name")
     parser.add_argument("--tts-voice", default=config.DEFAULT_TTS_VOICE, help="OpenAI TTS voice name")
-    parser.add_argument("--tts-format", default=config.DEFAULT_TTS_FORMAT, help="Audio format for TTS output")
     parser.add_argument(
         "--debug-stt",
         action="store_true",
@@ -560,25 +456,19 @@ def main() -> None:
         campaigns_root=None,
         saves_root=None,
     )
-    engine = Engine(
-        system_prompt=_load_system_prompt(),
-        gateway=OpenAIGateway(),
-    )
+
+    engine = Engine(system_prompt=_load_system_prompt(), gateway=OpenAIGateway())
     stt_client = OpenAITranscriber(model=args.stt_model)
-    tts_client = OpenAITTS(model=args.tts_model, voice=args.tts_voice, audio_format=args.tts_format)
+
+    # New best practice: stream + play via LocalAudioPlayer (no pw-cat, no SDL2 output, no pygame.mixer)
+    tts_player = OpenAILocalPCMPlayer(
+        model=args.tts_model,
+        voice=args.tts_voice,
+        response_format="pcm",
+        instructions=None,
+    )
 
     pygame.init()
-    try:
-        if args.tts_format == "pcm":
-            pygame.mixer.init(
-                frequency=config.DEFAULT_TTS_SAMPLE_RATE,
-                size=-(config.DEFAULT_TTS_SAMPLE_WIDTH * 8),
-                channels=config.DEFAULT_TTS_CHANNELS,
-            )
-        else:
-            pygame.mixer.init()
-    except Exception:
-        log.warning("pygame.mixer.init failed; audio playback may not work")
 
     pygame.display.set_caption("Ellegon")
     screen = pygame.display.set_mode((900, 600))
@@ -601,26 +491,12 @@ def main() -> None:
         engine=engine,
         save=save,
         stt=stt_client,
-        tts=tts_client,
         model_name=args.model,
-        tts_voice=args.tts_voice,
-        tts_format=args.tts_format,
     )
     job_queue.start()
     job_queue.submit_starter()
 
     recording = False
-    pending_audio_path: Optional[Path] = None
-    pcm_player: Optional[PCMStreamPlayer] = None
-    pcm_stream_active = False
-    pcm_stream_done = False
-
-    if args.tts_format == "pcm":
-        pcm_player = PCMStreamPlayer(
-            sample_rate=config.DEFAULT_TTS_SAMPLE_RATE,
-            channels=config.DEFAULT_TTS_CHANNELS,
-            sample_width=config.DEFAULT_TTS_SAMPLE_WIDTH,
-        )
 
     running = True
     while running:
@@ -655,6 +531,7 @@ def main() -> None:
                     channels=cap_cfg.channels,
                     sample_width=cap_cfg.sample_width,
                 )
+
                 if not pcm_bytes or rms <= 0:
                     status_state = apply_worker_event(
                         status_state,
@@ -662,22 +539,19 @@ def main() -> None:
                     )
                     status_state = apply_worker_event(status_state, WorkerEvent(type="idle"))
                     continue
+
                 if duration < 0.2:
                     status_state = apply_worker_event(
                         status_state,
-                        WorkerEvent(
-                            type="message", message="That was too quick. Hold SPACE a bit longer and try again."
-                        ),
+                        WorkerEvent(type="message", message="That was too quick. Hold SPACE a bit longer and try again."),
                     )
                     status_state = apply_worker_event(status_state, WorkerEvent(type="idle"))
                     continue
+
                 if rms < 150:
                     status_state = apply_worker_event(
                         status_state,
-                        WorkerEvent(
-                            type="message",
-                            message="Your microphone seems very quiet. Try speaking louder or check its gain.",
-                        ),
+                        WorkerEvent(type="message", message="Your microphone seems very quiet. Try speaking louder or check its gain."),
                     )
                     status_state = apply_worker_event(status_state, WorkerEvent(type="idle"))
                     continue
@@ -694,57 +568,21 @@ def main() -> None:
                 capture_id = str(int(time.time() * 1000))
                 job_queue.submit_audio(wav_bytes, debug_stt=args.debug_stt, capture_id=capture_id)
 
-        if recording:
-            if recorder is not None:
-                recorder.poll()
+        if recording and recorder is not None:
+            recorder.poll()
 
         try:
             while True:
                 worker_event = job_queue.events.get_nowait()
                 status_state = apply_worker_event(status_state, worker_event)
 
-                if worker_event.type == "tts_audio_chunk" and worker_event.audio_bytes:
-                    if pygame.mixer.get_init() is not None and pcm_player is not None:
-                        pcm_player.feed(worker_event.audio_bytes)
-                        pcm_stream_active = True
-                        status_state = apply_worker_event(status_state, WorkerEvent(type="speaking"))
-                    else:
-                        log.warning("Mixer not initialized; cannot play streamed TTS audio")
-                elif worker_event.type == "tts_audio_end":
-                    if pcm_player is not None:
-                        pcm_player.finalize()
-                        pcm_stream_done = True
-                elif worker_event.type == "tts_audio" and worker_event.audio_bytes:
-                    pending_audio_path = audio_utils.write_audio_bytes_to_temp_file(
-                        worker_event.audio_bytes, suffix=f".{args.tts_format}"
-                    )
-                    if pygame.mixer.get_init() is not None:
-                        pygame.mixer.music.load(str(pending_audio_path))
-                        pygame.mixer.music.play()
-                        status_state = apply_worker_event(status_state, WorkerEvent(type="speaking"))
-                    else:
-                        log.warning("Mixer not initialized; cannot play TTS audio")
+                # When dm_text arrives, start speaking immediately (streaming playback)
+                if worker_event.type == "dm_text" and worker_event.text:
+                    tts_player.play_text(worker_event.text)
+                    status_state = apply_worker_event(status_state, WorkerEvent(type="speaking"))
+
         except queue.Empty:
             pass
-
-        if args.tts_format == "pcm":
-            if (
-                status_state.status == STATUS_SPEAKING
-                and pcm_player is not None
-                and pcm_stream_active
-                and pcm_stream_done
-                and not pcm_player.is_playing()
-            ):
-                status_state = apply_worker_event(status_state, WorkerEvent(type="idle"))
-                pcm_stream_active = False
-                pcm_stream_done = False
-                pcm_player.reset()
-        elif (
-            status_state.status == STATUS_SPEAKING
-            and pygame.mixer.get_init() is not None
-            and not pygame.mixer.music.get_busy()
-        ):
-            status_state = apply_worker_event(status_state, WorkerEvent(type="idle"))
 
         screen.fill((20, 20, 28))
         status_text = font.render(f"Status: {status_state.status}", True, (240, 240, 240))
@@ -768,9 +606,8 @@ def main() -> None:
         clock.tick(30)
 
     job_queue.stop()
-    if pending_audio_path and pending_audio_path.exists():
-        pending_audio_path.unlink()
     pygame.quit()
+    tts_player.close()
 
 
 if __name__ == "__main__":
