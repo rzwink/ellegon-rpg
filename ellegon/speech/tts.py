@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Protocol
+from typing import Iterable, Optional, Protocol
 
 from ellegon import config
 
@@ -15,6 +15,16 @@ class TextToSpeech(Protocol):
         audio_format: Optional[str] = None,
         model: Optional[str] = None,
     ) -> bytes:
+        ...
+
+    def stream_speech(
+        self,
+        text: str,
+        *,
+        voice: Optional[str] = None,
+        audio_format: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> Iterable[bytes]:
         ...
 
 
@@ -55,6 +65,25 @@ class OpenAITTS:
             return content
         return bytes(content or b"")
 
+    def stream_speech(
+        self,
+        text: str,
+        *,
+        voice: Optional[str] = None,
+        audio_format: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> Iterable[bytes]:
+        stream = self._client().audio.speech.with_streaming_response.create(
+            model=model or self.model,
+            voice=voice or self.voice,
+            input=text,
+            response_format=audio_format or self.audio_format,
+        )
+        with stream as response:
+            for chunk in response.iter_bytes():
+                if chunk:
+                    yield chunk
+
 
 @dataclass
 class FakeTTS:
@@ -69,3 +98,13 @@ class FakeTTS:
         model: Optional[str] = None,
     ) -> bytes:
         return self.output_audio
+
+    def stream_speech(
+        self,
+        text: str,
+        *,
+        voice: Optional[str] = None,
+        audio_format: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> Iterable[bytes]:
+        return [self.output_audio]

@@ -224,11 +224,7 @@ class JobQueue:
                 self._events.put(WorkerEvent(type="idle"))
                 return
             self._events.put(WorkerEvent(type="dm_text", text=dm_text))
-            self._events.put(WorkerEvent(type="speaking"))
-            audio_bytes = self._tts.synthesize_speech(
-                dm_text, voice=self._tts_voice, audio_format=self._tts_format
-            )
-            self._events.put(WorkerEvent(type="tts_audio", audio_bytes=audio_bytes))
+            self._emit_tts_audio(dm_text)
         except Exception as exc:
             log.exception("Starter handler failed")
             self._events.put(WorkerEvent(type="error", message=str(exc)))
@@ -291,15 +287,116 @@ class JobQueue:
 
             dm_text = self._engine.run_player_turn(self._save, transcript, self._model_name)
             self._events.put(WorkerEvent(type="dm_text", text=dm_text))
-            self._events.put(WorkerEvent(type="speaking"))
-
-            audio_reply = self._tts.synthesize_speech(
-                dm_text, voice=self._tts_voice, audio_format=self._tts_format
-            )
-            self._events.put(WorkerEvent(type="tts_audio", audio_bytes=audio_reply))
+            self._emit_tts_audio(dm_text)
         except Exception as exc:
             log.exception("Audio handler failed capture_id=%s", capture_id)
             self._events.put(WorkerEvent(type="error", message=str(exc)))
+
+    def _emit_tts_audio(self, dm_text: str) -> None:
+        self._events.put(WorkerEvent(type="speaking"))
+        if self._tts_format == "pcm":
+            for chunk in self._tts.stream_speech(
+                dm_text, voice=self._tts_voice, audio_format=self._tts_format
+            ):
+                if chunk:
+                    self._events.put(WorkerEvent(type="tts_audio_chunk", audio_bytes=chunk))
+            self._events.put(WorkerEvent(type="tts_audio_end"))
+            return
+        audio_bytes = self._tts.synthesize_speech(
+            dm_text, voice=self._tts_voice, audio_format=self._tts_format
+        )
+        self._events.put(WorkerEvent(type="tts_audio", audio_bytes=audio_bytes))
+
+
+class PCMStreamPlayer:
+    def __init__(
+        self,
+        *,
+        sample_rate: int,
+        channels: int,
+        sample_width: int,
+        chunk_duration: float = 0.25,
+    ) -> None:
+        self._sample_rate = sample_rate
+        self._channels = channels
+        self._sample_width = sample_width
+        self._frame_size = channels * sample_width
+        self._chunk_bytes = max(1, int(sample_rate * chunk_duration) * self._frame_size)
+        self._buffer = bytearray()
+        self._channel: Optional[object] = None
+        self._active = False
+        self._completed = False
+
+    @property
+    def completed(self) -> bool:
+        return self._completed
+
+    def start(self) -> None:
+        self._buffer.clear()
+        self._completed = False
+        self._active = True
+
+    def feed(self, pcm_bytes: bytes) -> None:
+        if not pcm_bytes:
+            return
+        if not self._active:
+            self.start()
+        self._buffer.extend(pcm_bytes)
+        self._flush_buffer()
+
+    def finalize(self) -> None:
+        self._flush_buffer(flush_all=True)
+        self._completed = True
+
+    def _flush_buffer(self, *, flush_all: bool = False) -> None:
+        if not self._buffer:
+            return
+        while self._buffer and (flush_all or len(self._buffer) >= self._chunk_bytes):
+            if flush_all:
+                chunk = bytes(self._buffer)
+                self._buffer.clear()
+            else:
+                chunk = bytes(self._buffer[: self._chunk_bytes])
+                del self._buffer[: self._chunk_bytes]
+            self._queue_chunk(chunk)
+
+    def _queue_chunk(self, chunk: bytes) -> None:
+        if not chunk or self._frame_size <= 0:
+            return
+        trim = len(chunk) - (len(chunk) % self._frame_size)
+        if trim <= 0:
+            return
+        chunk = chunk[:trim]
+        sound = self._make_sound(chunk)
+        if sound is None:
+            return
+        if self._channel is None:
+            import pygame
+
+            self._channel = pygame.mixer.find_channel() or pygame.mixer.Channel(0)
+        if self._channel.get_busy():
+            self._channel.queue(sound)
+        else:
+            self._channel.play(sound)
+
+    def _make_sound(self, chunk: bytes) -> Optional[object]:
+        try:
+            import pygame
+
+            return pygame.mixer.Sound(buffer=chunk)
+        except Exception as exc:
+            log.warning("Failed to create Sound chunk: %s", exc)
+            return None
+
+    def is_playing(self) -> bool:
+        if self._channel is None:
+            return False
+        return bool(self._channel.get_busy())
+
+    def reset(self) -> None:
+        self._buffer.clear()
+        self._active = False
+        self._completed = False
 
 
 class PygameAudioRecorder:
@@ -472,7 +569,14 @@ def main() -> None:
 
     pygame.init()
     try:
-        pygame.mixer.init()
+        if args.tts_format == "pcm":
+            pygame.mixer.init(
+                frequency=config.DEFAULT_TTS_SAMPLE_RATE,
+                size=-(config.DEFAULT_TTS_SAMPLE_WIDTH * 8),
+                channels=config.DEFAULT_TTS_CHANNELS,
+            )
+        else:
+            pygame.mixer.init()
     except Exception:
         log.warning("pygame.mixer.init failed; audio playback may not work")
 
@@ -507,6 +611,16 @@ def main() -> None:
 
     recording = False
     pending_audio_path: Optional[Path] = None
+    pcm_player: Optional[PCMStreamPlayer] = None
+    pcm_stream_active = False
+    pcm_stream_done = False
+
+    if args.tts_format == "pcm":
+        pcm_player = PCMStreamPlayer(
+            sample_rate=config.DEFAULT_TTS_SAMPLE_RATE,
+            channels=config.DEFAULT_TTS_CHANNELS,
+            sample_width=config.DEFAULT_TTS_SAMPLE_WIDTH,
+        )
 
     running = True
     while running:
@@ -589,7 +703,18 @@ def main() -> None:
                 worker_event = job_queue.events.get_nowait()
                 status_state = apply_worker_event(status_state, worker_event)
 
-                if worker_event.type == "tts_audio" and worker_event.audio_bytes:
+                if worker_event.type == "tts_audio_chunk" and worker_event.audio_bytes:
+                    if pygame.mixer.get_init() is not None and pcm_player is not None:
+                        pcm_player.feed(worker_event.audio_bytes)
+                        pcm_stream_active = True
+                        status_state = apply_worker_event(status_state, WorkerEvent(type="speaking"))
+                    else:
+                        log.warning("Mixer not initialized; cannot play streamed TTS audio")
+                elif worker_event.type == "tts_audio_end":
+                    if pcm_player is not None:
+                        pcm_player.finalize()
+                        pcm_stream_done = True
+                elif worker_event.type == "tts_audio" and worker_event.audio_bytes:
                     pending_audio_path = audio_utils.write_audio_bytes_to_temp_file(
                         worker_event.audio_bytes, suffix=f".{args.tts_format}"
                     )
@@ -602,7 +727,19 @@ def main() -> None:
         except queue.Empty:
             pass
 
-        if (
+        if args.tts_format == "pcm":
+            if (
+                status_state.status == STATUS_SPEAKING
+                and pcm_player is not None
+                and pcm_stream_active
+                and pcm_stream_done
+                and not pcm_player.is_playing()
+            ):
+                status_state = apply_worker_event(status_state, WorkerEvent(type="idle"))
+                pcm_stream_active = False
+                pcm_stream_done = False
+                pcm_player.reset()
+        elif (
             status_state.status == STATUS_SPEAKING
             and pygame.mixer.get_init() is not None
             and not pygame.mixer.music.get_busy()
