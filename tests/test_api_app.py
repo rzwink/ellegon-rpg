@@ -6,6 +6,8 @@ from fastapi.testclient import TestClient
 
 from ellegon.apps.api_app import create_app
 from ellegon.llm.gateway import FakeGateway
+from ellegon.speech.stt import FakeTranscriber
+from ellegon.speech.tts import FakeTTS
 from ellegon.sessions.persistence import save_path_for
 
 
@@ -14,10 +16,14 @@ def _build_client(
     campaigns_root: Path,
     saves_root: Path,
     output_text: str = "HELLO",
+    tts_audio: bytes = b"AUDIO",
+    transcript: str = "transcribed text",
 ) -> TestClient:
     app = create_app(
         system_prompt="System",
         gateway=FakeGateway(output_text=output_text),
+        tts=FakeTTS(output_audio=tts_audio),
+        transcriber=FakeTranscriber(output_text=transcript),
         campaigns_root=campaigns_root,
         saves_root=saves_root,
     )
@@ -90,3 +96,104 @@ def test_turn_endpoint_runs_engine_turn(
     data = response.json()
     assert data["dm_text"] == "Next"
     assert data["turn"] == 1
+
+
+def test_websocket_turn_streams_tts_chunks(
+    temp_campaigns_root: Path, temp_saves_root: Path
+) -> None:
+    client = _build_client(
+        campaigns_root=temp_campaigns_root,
+        saves_root=temp_saves_root,
+        output_text="Narration",
+        tts_audio=b"VOICE",
+    )
+
+    with client.websocket_connect("/ws/sessions") as ws:
+        ws.receive_json()  # status idle
+        ws.receive_json()  # connected message
+
+        ws.send_json(
+            {
+                "type": "start",
+                "campaign_id": "test_campaign",
+                "instance_id": "ws_turn",
+                "players": 1,
+                "model": "fake-model",
+            }
+        )
+
+        start_events = [ws.receive_json() for _ in range(7)]
+        assert [event["type"] for event in start_events] == [
+            "status",
+            "dm_text",
+            "status",
+            "tts_start",
+            "tts_chunk",
+            "tts_end",
+            "session",
+        ]
+
+        ws.send_json({"type": "turn", "user_text": "Investigate"})
+
+        turn_events = [ws.receive_json() for _ in range(8)]
+        assert [event["type"] for event in turn_events] == [
+            "status",
+            "transcript",
+            "dm_text",
+            "status",
+            "tts_start",
+            "tts_chunk",
+            "tts_end",
+            "session",
+        ]
+        assert turn_events[2]["text"] == "Narration"
+
+
+def test_websocket_stt_commit_auto_turn(
+    temp_campaigns_root: Path, temp_saves_root: Path
+) -> None:
+    client = _build_client(
+        campaigns_root=temp_campaigns_root,
+        saves_root=temp_saves_root,
+        output_text="Auto reply",
+        tts_audio=b"SPEECH",
+        transcript="spoken words",
+    )
+
+    with client.websocket_connect("/ws/sessions") as ws:
+        ws.receive_json()
+        ws.receive_json()
+
+        ws.send_json(
+            {
+                "type": "start",
+                "campaign_id": "test_campaign",
+                "instance_id": "ws_stt",
+                "players": 1,
+            }
+        )
+        for _ in range(7):
+            ws.receive_json()
+
+        ws.send_json({"type": "stt_chunk", "audio_chunk_b64": "AAECAw==", "sample_rate": 16000, "channels": 1})
+        buffered = ws.receive_json()
+        assert buffered["type"] == "stt_buffered"
+        assert buffered["payload"]["bytes"] == 4
+
+        ws.send_json({"type": "stt_commit", "auto_turn": True})
+
+        events = [ws.receive_json() for _ in range(10)]
+        assert [event["type"] for event in events] == [
+            "status",
+            "transcript",
+            "status",
+            "transcript",
+            "dm_text",
+            "status",
+            "tts_start",
+            "tts_chunk",
+            "tts_end",
+            "session",
+        ]
+        assert events[1]["text"] == "spoken words"
+        assert events[4]["text"] == "Auto reply"
