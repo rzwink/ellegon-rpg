@@ -283,3 +283,18 @@ Email: rzwink@gmail
 sudo apt-get update
 sudo apt-get install -y libportaudio2 portaudio19-dev
 pip install -U sounddevice
+
+## Generate a New Campaign from Notes
+
+You can generate a full, schema-valid campaign JSON from a plain text idea file.
+
+```bash
+python -m ellegon.apps.campaign_builder --input /path/to/campaign_notes.txt
+```
+
+This command reads your notes, includes the root `ellegon-campaign.schema.json` as the structural reference, runs multiple discrete LLM prompts for campaign sections, and writes a new numbered campaign folder.
+
+Optional flags:
+- `--campaign-folder 010`
+- `--model gpt-5.2-2025-12-11`
+- `--campaigns-root /custom/campaigns`
