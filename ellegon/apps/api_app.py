@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import logging
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -17,6 +19,9 @@ from starlette.responses import Response
 from ellegon import config
 from ellegon.campaigns.loader import CampaignValidationError
 from ellegon.llm.gateway import LLMGateway, OpenAIGateway
+from ellegon.speech.audio import AudioConfig, pcm16_to_wav_bytes
+from ellegon.speech.stt import OpenAITranscriber, SpeechToText
+from ellegon.speech.tts import OpenAITTS, TextToSpeech
 from ellegon.service.engine import Engine
 from ellegon.sessions.persistence import load_or_create_save
 
@@ -113,6 +118,14 @@ class WSClientMessage(BaseModel):
     players: Optional[int] = Field(default=None, ge=1)
     model: Optional[str] = None
     user_text: Optional[str] = None
+    audio_chunk_b64: Optional[str] = None
+    sample_rate: Optional[int] = Field(default=None, ge=8_000)
+    channels: Optional[int] = Field(default=None, ge=1)
+    stt_model: Optional[str] = None
+    tts_model: Optional[str] = None
+    tts_voice: Optional[str] = None
+    tts_format: Optional[str] = None
+    auto_turn: bool = False
 
 
 class WSServerEvent(BaseModel):
@@ -177,10 +190,55 @@ class ConnectionManager:
             pass
 
 
+@dataclass
+class AudioBuffer:
+    pcm_data: bytearray
+    sample_rate: int
+    channels: int
+
+    @classmethod
+    def create_empty(cls) -> "AudioBuffer":
+        return cls(
+            pcm_data=bytearray(),
+            sample_rate=config.DEFAULT_AUDIO_SAMPLE_RATE,
+            channels=config.DEFAULT_AUDIO_CHANNELS,
+        )
+
+
+def _iter_tts_chunks(
+    tts: TextToSpeech,
+    text: str,
+    *,
+    voice: Optional[str],
+    audio_format: Optional[str],
+    model: Optional[str],
+) -> asyncio.Queue[Optional[bytes]]:
+    queue: asyncio.Queue[Optional[bytes]] = asyncio.Queue()
+    loop = asyncio.get_running_loop()
+
+    def worker() -> None:
+        try:
+            for chunk in tts.stream_speech(
+                text,
+                voice=voice,
+                audio_format=audio_format,
+                model=model,
+            ):
+                if chunk:
+                    loop.call_soon_threadsafe(queue.put_nowait, chunk)
+        finally:
+            loop.call_soon_threadsafe(queue.put_nowait, None)
+
+    threading.Thread(target=worker, daemon=True).start()
+    return queue
+
+
 def create_app(
         *,
         system_prompt: Optional[str] = None,
         gateway: Optional[LLMGateway] = None,
+        tts: Optional[TextToSpeech] = None,
+        transcriber: Optional[SpeechToText] = None,
         campaigns_root: Optional[Path] = None,
         saves_root: Optional[Path] = None,
 ) -> FastAPI:
@@ -208,6 +266,8 @@ def create_app(
     app.add_middleware(PrivateNetworkAccessMiddleware)
 
     app.state.engine = engine
+    app.state.tts = tts or OpenAITTS()
+    app.state.transcriber = transcriber or OpenAITranscriber()
     app.state.campaigns_root = campaigns_root
     app.state.saves_root = saves_root
     app.state.ws_manager = ConnectionManager()
@@ -294,6 +354,7 @@ def create_app(
         current: Optional[SessionKey] = None
         players: Optional[int] = None
         model: Optional[str] = None
+        audio_buffer: AudioBuffer = AudioBuffer.create_empty()
 
         async def emit_status(status: str) -> None:
             await manager.safe_send(ws, WSServerEvent(type="status", status=status))
@@ -320,6 +381,72 @@ def create_app(
                     },
                 ),
             )
+
+        async def emit_tts(text: str, msg: WSClientMessage) -> None:
+            tts_queue = _iter_tts_chunks(
+                app.state.tts,
+                text,
+                voice=msg.tts_voice,
+                audio_format=msg.tts_format,
+                model=msg.tts_model,
+            )
+            await manager.safe_send(ws, WSServerEvent(type="tts_start"))
+            while True:
+                chunk = await tts_queue.get()
+                if chunk is None:
+                    break
+                await manager.safe_send(
+                    ws,
+                    WSServerEvent(
+                        type="tts_chunk",
+                        payload={"audio_chunk_b64": base64.b64encode(chunk).decode("ascii")},
+                    ),
+                )
+            await manager.safe_send(ws, WSServerEvent(type="tts_end"))
+
+        async def run_turn_from_text(user_text: str, msg: WSClientMessage) -> None:
+            if current is None:
+                await emit_error("No active session. Send a start message first.")
+                return
+            if not user_text.strip():
+                await emit_message("Empty input. Try again.")
+                await emit_status(STATUS_IDLE)
+                return
+
+            turn_players = msg.players or players
+            turn_model = msg.model or model or config.DEFAULT_MODEL
+            if not turn_players:
+                await emit_error("Missing players for turn.")
+                return
+
+            await emit_status(STATUS_THINKING)
+            await manager.safe_send(ws, WSServerEvent(type="transcript", text=user_text.strip()))
+
+            try:
+                dm_text, save = app.state.engine.run_turn(
+                    campaign_id=current.campaign_id,
+                    instance_id=current.instance_id,
+                    players=turn_players,
+                    user_text=user_text,
+                    model_name=turn_model,
+                )
+
+                await manager.safe_send(ws, WSServerEvent(type="dm_text", text=dm_text))
+                await emit_status(STATUS_SPEAKING)
+                await emit_tts(dm_text, msg)
+                await emit_session_snapshot(save, dm_text=dm_text)
+                await asyncio.sleep(0.05)
+                await emit_status(STATUS_IDLE)
+            except FileNotFoundError as exc:
+                await emit_error(str(exc))
+                await emit_status(STATUS_IDLE)
+            except CampaignValidationError as exc:
+                await emit_error("Campaign validation failed.", payload={"errors": exc.errors})
+                await emit_status(STATUS_IDLE)
+            except Exception as exc:
+                logger.exception("WS turn failed")
+                await emit_error(str(exc))
+                await emit_status(STATUS_IDLE)
 
         try:
             await emit_status(STATUS_IDLE)
@@ -365,6 +492,7 @@ def create_app(
                         if dm_text:
                             await manager.safe_send(ws, WSServerEvent(type="dm_text", text=dm_text))
                             await emit_status(STATUS_SPEAKING)
+                            await emit_tts(dm_text, msg)
                         else:
                             await emit_status(STATUS_IDLE)
 
@@ -384,58 +512,75 @@ def create_app(
                     continue
 
                 if msg.type == "turn":
-                    if current is None:
-                        await emit_error("No active session. Send a start message first.")
-                        continue
-                    if not msg.user_text or not msg.user_text.strip():
+                    if not msg.user_text:
                         await emit_message("Empty input. Try again.")
                         await emit_status(STATUS_IDLE)
                         continue
+                    await run_turn_from_text(msg.user_text, msg)
+                    continue
 
-                    # Allow override per message, but fall back to sticky context
-                    turn_players = msg.players or players
-                    turn_model = msg.model or model or config.DEFAULT_MODEL
-                    if not turn_players:
-                        await emit_error("Missing players for turn.")
+                if msg.type == "stt_chunk":
+                    if not msg.audio_chunk_b64:
+                        await emit_error("Missing audio_chunk_b64 for stt_chunk.")
+                        continue
+                    try:
+                        audio_buffer.pcm_data.extend(base64.b64decode(msg.audio_chunk_b64))
+                        if msg.sample_rate:
+                            audio_buffer.sample_rate = msg.sample_rate
+                        if msg.channels:
+                            audio_buffer.channels = msg.channels
+                        await manager.safe_send(
+                            ws,
+                            WSServerEvent(
+                                type="stt_buffered",
+                                payload={"bytes": len(audio_buffer.pcm_data)},
+                            ),
+                        )
+                    except Exception:
+                        await emit_error("Invalid base64 payload for stt_chunk.")
+                    continue
+
+                if msg.type == "stt_commit":
+                    if not audio_buffer.pcm_data:
+                        await emit_message("No buffered audio. Send stt_chunk first.")
                         continue
 
                     await emit_status(STATUS_THINKING)
-
-                    # Echo transcript event so UI can display immediately
-                    await manager.safe_send(ws, WSServerEvent(type="transcript", text=msg.user_text.strip()))
-
                     try:
-                        # If your Engine has a pure text method, keep it.
-                        # This is the same as your HTTP endpoint, just with status events.
-                        dm_text, save = app.state.engine.run_turn(
-                            campaign_id=current.campaign_id,
-                            instance_id=current.instance_id,
-                            players=turn_players,
-                            user_text=msg.user_text,
-                            model_name=turn_model,
+                        wav_bytes = pcm16_to_wav_bytes(
+                            bytes(audio_buffer.pcm_data),
+                            config=AudioConfig(
+                                sample_rate=audio_buffer.sample_rate,
+                                channels=audio_buffer.channels,
+                                sample_width=config.DEFAULT_AUDIO_SAMPLE_WIDTH,
+                            ),
                         )
-
-                        await manager.safe_send(ws, WSServerEvent(type="dm_text", text=dm_text))
-                        await emit_status(STATUS_SPEAKING)
-                        await emit_session_snapshot(save, dm_text=dm_text)
-
-                        # Let the client decide when TTS playback ends.
-                        # After a short delay, go idle unless the client sends a "speaking_done" message
-                        # (not required; optional UX enhancement).
-                        await asyncio.sleep(0.05)
-                        await emit_status(STATUS_IDLE)
-
-                    except FileNotFoundError as exc:
-                        await emit_error(str(exc))
-                        await emit_status(STATUS_IDLE)
-                    except CampaignValidationError as exc:
-                        await emit_error("Campaign validation failed.", payload={"errors": exc.errors})
-                        await emit_status(STATUS_IDLE)
+                        transcript = await asyncio.to_thread(
+                            app.state.transcriber.transcribe_wav_bytes,
+                            wav_bytes,
+                            model=msg.stt_model,
+                        )
                     except Exception as exc:
-                        logger.exception("WS turn failed")
-                        await emit_error(str(exc))
+                        await emit_error(f"STT failed: {exc}")
                         await emit_status(STATUS_IDLE)
+                        continue
 
+                    audio_buffer = AudioBuffer.create_empty()
+                    await manager.safe_send(ws, WSServerEvent(type="transcript", text=transcript))
+
+                    if msg.auto_turn:
+                        await run_turn_from_text(transcript, msg)
+                    else:
+                        await emit_status(STATUS_IDLE)
+                    continue
+
+                if msg.type == "tts":
+                    if not msg.user_text or not msg.user_text.strip():
+                        await emit_error("Missing user_text for tts message.")
+                        continue
+                    await emit_status(STATUS_SPEAKING)
+                    await emit_tts(msg.user_text.strip(), msg)
+                    await emit_status(STATUS_IDLE)
                     continue
 
                 await emit_error("Unknown message type.", payload={"type": msg.type})
