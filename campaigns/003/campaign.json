@@ -1,0 +1,266 @@
+{
+  "id": "stone_watchers_of_columbus",
+  "title": "The Stone Watchers of Columbus",
+  "recommended_age": 9,
+  "campaign_overview": {
+    "theme": "A modern fantasy about hidden guardians, courage, and protecting your city.",
+    "tone_description": "Mysterious but comforting. The world feels familiar and safe, yet full of secrets. Magic exists quietly alongside everyday life.",
+    "goal": "Discover the truth behind the awakening gargoyles of Columbus and help prevent a mistake that could trap them forever.",
+    "completion_condition": "The kids help the gargoyles renew their ancient duty so the city stays protected and the guardians are not trapped forever.",
+    "estimated_sessions": 1,
+    "intended_length_minutes": 45,
+    "player_experience_goals": [
+      "Feel clever and brave",
+      "Explore a real city with hidden magic",
+      "Protect something important",
+      "Make choices that matter"
+    ]
+  },
+  "ruleset": {
+    "system_name": "Stone & Shadows Light Adventure Rules",
+    "design_goals": [
+      "Easy to learn",
+      "Imagination first",
+      "Kid friendly tension",
+      "No permanent loss"
+    ],
+    "core_mechanics": {
+      "primary_die": "d20",
+      "success_thresholds": {
+        "success": "14 or higher",
+        "partial_success": "9 to 13",
+        "failure": "8 or lower",
+        "critical_success": "20",
+        "critical_failure": "1"
+      },
+      "damage_die": "d6",
+      "failure_philosophy": "Failure adds problems or choices, never ends the adventure."
+    },
+    "character_basics": {
+      "starting_hit_points": {
+        "default": 10,
+        "tough": 11,
+        "fragile": 9
+      },
+      "tracked_attributes": [
+        "name",
+        "age",
+        "description",
+        "hit_points",
+        "inventory",
+        "currency",
+        "known_facts"
+      ],
+      "death_rules": "Kids are never harmed. At zero hit points, they are scared, stuck, or need help."
+    },
+    "combat_rules": {
+      "style": "Very light, story focused, non graphic",
+      "enemy_hit_points_range": "3 to 6",
+      "combat_end_condition": "Conflict ends when the problem is solved or escaped"
+    },
+    "hybrid_rules": {
+      "allowed": false,
+      "rule": "Not used in this campaign.",
+      "stacking": "Not used."
+    }
+  },
+  "starting_state": {
+    "location": "Downtown Columbus at sunset",
+    "location_description": "Streetlights flicker on as orange light fades off brick walls. High above doorways and rooftops, stone figures stare down like they are waiting.",
+    "hit_points": 10,
+    "inventory": [
+      "Backpack",
+      "Flashlight",
+      "Phone with low battery",
+      "Pencil"
+    ],
+    "currency": {
+      "bronze": 0,
+      "silver": 0,
+      "gold": 0,
+      "platinum": 0
+    },
+    "known_facts": [
+      "Strange things happen after dark in the city",
+      "Some statues seem to be watching",
+      "Tonight feels different, like the air is holding its breath"
+    ],
+    "starting_expectation_for_dm": "Start grounded in everyday Columbus, then introduce one impossible detail: a stone gargoyle blinking."
+  },
+  "acts": [
+    {
+      "id": "act_one_that_blinked",
+      "title": "The One That Blinked",
+      "purpose": "Introduce the secret world of gargoyles and the first clue.",
+      "narrative_summary": "A gargoyle statue near a public building blinks and shifts when no one is looking directly at it. The kids realize something is alive in the stone.",
+      "key_elements": [
+        "A gargoyle above an entrance",
+        "A soft scraping sound like stone moving",
+        "A warm carved symbol shaped like a circle around a keyhole"
+      ],
+      "possible_player_actions": [
+        "Stare at the gargoyle to see if it moves",
+        "Use the flashlight to look for scratches or carvings",
+        "Make a rubbing of the symbol with paper and pencil",
+        "Follow distant scraping sounds toward the river"
+      ],
+      "success_condition": "The kids confirm the gargoyles wake at night and obtain the first clear clue (the symbol rubbing or a spoken warning).",
+      "failure_guidance": "If they cannot prove it, the gargoyle leaves evidence: a fresh stone chip, a feather-like shard, or a whispered sentence from the shadows.",
+      "dm_notes": "Keep this eerie but safe. The gargoyle is curious, not hostile."
+    },
+    {
+      "id": "act_guardians_in_trouble",
+      "title": "Guardians in Trouble",
+      "purpose": "Reveal the threat and establish urgency with a solvable objective.",
+      "narrative_summary": "A gargoyle explains that a restoration project will seal cracks with a bonding compound that accidentally locks gargoyles into permanent sleep. The city would lose its unseen protection.",
+      "key_elements": [
+        "A rooftop meeting with a gargoyle",
+        "A map showing three guardian points",
+        "A clear deadline: midnight is the only time the bond can be changed"
+      ],
+      "possible_player_actions": [
+        "Ask the gargoyle about rules and limits",
+        "Find a posted schedule or permit notice",
+        "Sneak to a quiet place to compare clues on the map",
+        "Decide who to trust with the truth"
+      ],
+      "success_condition": "The kids learn what causes the permanent sealing and what must be done before midnight to prevent it.",
+      "failure_guidance": "If they cannot find the schedule or map, the gargoyle provides the needed details but asks for a promise in return, adding a meaningful choice instead of stopping progress.",
+      "dm_notes": "Give the players a clear next step: reach the midnight site with the symbol rubbing and the three locations identified."
+    },
+    {
+      "id": "act_choice_at_midnight",
+      "title": "The Choice at Midnight",
+      "purpose": "Deliver the finale, a clear solution, and a satisfying ending.",
+      "narrative_summary": "At midnight, the kids perform a simple renewal ritual at a high stone landmark. They must choose the exact words of their promise, shaping how the gargoyles protect the city.",
+      "key_elements": [
+        "A high stone landmark with a view of rooftops",
+        "Moonlight hitting the symbol rubbing",
+        "A final choice spoken aloud before dawn"
+      ],
+      "possible_player_actions": [
+        "Speak a promise that includes protecting the city and the gargoyles",
+        "Ask the gargoyles to protect a specific place or person",
+        "Use teamwork to finish the ritual even if something interrupts",
+        "Make a brave tradeoff to complete the renewal"
+      ],
+      "success_condition": "The bond is renewed, the restoration work cannot trap the gargoyles, and the city keeps its stone guardians.",
+      "failure_guidance": "If the ritual goes wrong, allow a last-second correction: rewrite one line of the promise, replace a missing item with a creative substitute, or accept a small personal sacrifice to complete it.",
+      "dm_notes": "End with dawn. Statues go still again, but the kids know the guardians are there."
+    }
+  ],
+  "locations": [
+    {
+      "id": "main_library_steps",
+      "name": "Main Library Steps",
+      "description": "Wide steps and tall doors beneath stonework that looks ordinary until night makes it feel alive.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Stone gargoyle perch",
+        "Old plaque with dates",
+        "Quiet corners for making a symbol rubbing"
+      ]
+    },
+    {
+      "id": "scioto_river_bridge",
+      "name": "Scioto River Bridge",
+      "description": "Windy railings and dark water below. Reflections make the stone faces look like they move when you blink.",
+      "danger_level": "Medium",
+      "notable_features": [
+        "Strong gusts",
+        "Hidden carved marks under the railing",
+        "A good place for a secret meeting"
+      ]
+    },
+    {
+      "id": "goodale_water_tower",
+      "name": "Goodale Park Water Tower",
+      "description": "An old stone tower that catches moonlight at midnight. The top landing feels like the city is listening.",
+      "danger_level": "Medium",
+      "notable_features": [
+        "Spiral stairs",
+        "A flat stone surface for the ritual",
+        "A view of rooftops and streetlights"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "id": "gravewatch",
+      "name": "Gravewatch",
+      "role": "Ancient gargoyle guardian",
+      "personality": "Patient, careful, quietly funny when it trusts someone.",
+      "motivation": "Keep the city safe without losing the guardians to permanent stone sleep.",
+      "hit_points": 6,
+      "can_be_fought": false,
+      "can_be_talked_to": true,
+      "can_give_hints": true,
+      "possible_dialogue_hooks": [
+        "We wake when the city needs us, and sleep when the sun returns.",
+        "A well-meaning repair can become a prison.",
+        "Midnight is the hinge. After that, the stone decides."
+      ]
+    },
+    {
+      "id": "chisel",
+      "name": "Chisel",
+      "role": "Young gargoyle scout",
+      "personality": "Energetic, curious, a little dramatic.",
+      "motivation": "Prove it can protect people and not be forgotten.",
+      "hit_points": 4,
+      "can_be_fought": false,
+      "can_be_talked_to": true,
+      "can_give_hints": true,
+      "possible_dialogue_hooks": [
+        "I know the fastest rooftops to the tower.",
+        "Humans never look up, until they do.",
+        "If you are brave, I will be brave too."
+      ]
+    },
+    {
+      "id": "ms_calder",
+      "name": "Ms. Calder",
+      "role": "Restoration project lead",
+      "personality": "Focused, practical, kind but skeptical.",
+      "motivation": "Preserve historic stonework and keep the public safe.",
+      "hit_points": 0,
+      "can_be_fought": false,
+      "can_be_talked_to": true,
+      "can_give_hints": false,
+      "possible_dialogue_hooks": [
+        "We start sealing at first light. Safety first.",
+        "These cracks are older than any of us.",
+        "If you have proof, show me. Real proof."
+      ]
+    }
+  ],
+  "rewards": {
+    "completion_rewards": {
+      "currency": {
+        "bronze": 0,
+        "silver": 0,
+        "gold": 0,
+        "platinum": 0
+      },
+      "items": [
+        "Stone Charm of Protection"
+      ],
+      "story_reward": "The kids become trusted allies of the stone watchers, and Columbus remains protected by guardians no one else knows about."
+    }
+  },
+  "dm_guidance": {
+    "tone": "Mysterious, warm, and empowering.",
+    "rules": [
+      "Keep danger emotional, not physical",
+      "Use partial successes to add time pressure or tradeoffs",
+      "Make the city feel real: streetlights, bridges, brick, wind, and echoes",
+      "If a player is stuck, let an NPC hint without solving it for them",
+      "End with a clear dawn scene that confirms success"
+    ],
+    "completion_behavior": "After the midnight choice, describe the ritual completing, the gargoyles settling back into stillness, and the first light of dawn. Clearly state that the adventure is complete."
+  },
+  "intro": {
+    "text": "You are kids in Columbus, Ohio. It is sunset downtown, and everything feels normal until you notice it: a stone gargoyle above a doorway blinks. Not a shadow, not a trick. A real blink. Somewhere nearby, stone scrapes softly against stone, and a quiet voice whispers, \"Do not let them seal us.\"",
+    "read_aloud": true
+  }
+}
