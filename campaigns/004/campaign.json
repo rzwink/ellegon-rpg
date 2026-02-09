@@ -1,0 +1,266 @@
+{
+  "id": "cupbearer_of_ashenlight",
+  "title": "The Cupbearer of Ashenlight",
+  "recommended_age": 10,
+  "campaign_overview": {
+    "theme": "Courage and mercy in the face of fear; protecting others rather than conquering them",
+    "tone_description": "Gentle, hopeful, mythic-fantasy; tense moments without graphic harm; problems are solved through empathy and brave choices.",
+    "goal": "Help the people of Ashenlight face the returning dragon Aurelion by finding true courage and offering peace, protecting the city through mercy and understanding.",
+    "completion_condition": "The dragon chooses to stop threatening the city after the heroes offer a fearless, non-violent act of protection (the 'empty cup' moment), and Ashenlight reaches sunrise still standing and safer.",
+    "estimated_sessions": 3,
+    "intended_length_minutes": 180,
+    "player_experience_goals": [
+      "Practice bravery that isn\u2019t about fighting",
+      "Make meaningful moral choices (protect vs. conquer)",
+      "Use roleplay and creative problem-solving to resolve a major threat",
+      "Feel wonder and mystery through symbols (the cup, the Beloved, 'before the dawn')"
+    ]
+  },
+  "starting_state": {
+    "location": "Unknown starting location",
+    "location_description": "",
+    "hit_points": 10,
+    "inventory": [],
+    "currency": {
+      "bronze": 0,
+      "silver": 0,
+      "gold": 0,
+      "platinum": 0
+    },
+    "known_facts": [],
+    "starting_expectation_for_dm": "Begin with a clear opening choice."
+  },
+  "acts": [
+    {
+      "id": "act_1_gathering_cinders",
+      "title": "Act I: Gathering Cinders, Gathering Courage",
+      "purpose": "Introduce Ashenlight, the fear of Aurelion\u2019s return, and the central choice: protect with courage and mercy rather than prepare for conquest.",
+      "narrative_summary": "Ashenlight prepares for the Night of Ash, when the dragon Aurelion is said to circle the city before dawn. Rumors spread: some want to hide, some want to fight, some want to offer tribute. The heroes meet frightened townsfolk and a keeper of an old shrine who speaks of the Cupbearer\u2014one who can carry an empty cup into fear and return with peace. The party learns that the \u2018empty cup\u2019 is not a trick or weapon, but a symbol: protection without threat. To be recognized by the shrine and gain guidance, the heroes must perform small acts of brave mercy around the city\u2014standing with the scared, stopping panic, and choosing safety over revenge.",
+      "key_elements": [
+        "The city of Ashenlight: lantern-lit streets, ash-gray rooftops, dawn bells",
+        "Rumors and disagreements about Aurelion\u2019s intentions",
+        "The Shrine of the Beloved (a gentle, mythic presence tied to mercy)",
+        "The Empty Cup symbol: courage without violence",
+        "Non-graphic tension: alarms, smoke, shadows overhead, but no gore",
+        "NPCs: anxious captain of the watch, kind shrine-keeper, fearful child who heard wings",
+        "Aurelion\u2019s sign: distant heat-wind, falling soot like black snow"
+      ],
+      "possible_player_actions": [
+        "Calm a panicked crowd without threats or force",
+        "Help the watch protect people (evacuation routes, lantern lines, guiding families)",
+        "Investigate the shrine\u2019s stories and interpret the meaning of the Empty Cup",
+        "Speak with elders about past \u2018dragon nights\u2019 and what worked (or failed)",
+        "Choose mercy in a small conflict (e.g., forgive a scared thief stealing supplies)",
+        "Make a personal vow of protection (someone/something they will not abandon)"
+      ],
+      "success_condition": "The heroes earn the shrine-keeper\u2019s trust and receive a clear lead: where to go and what to do to attempt the \u2018empty cup\u2019 act before dawn.",
+      "failure_guidance": "If the heroes escalate fear, get blamed, or fail to calm the city, the shrine still offers a path\u2014but with added urgency: fewer supplies, more mistrust, and a harder time moving through guarded streets. Emphasize repair: they can apologize, make amends, and regain trust through a concrete protective act.",
+      "dm_notes": "Keep threats implied and atmospheric. Reward empathetic choices with practical benefits (safe routes, helpful NPC allies, clearer clues). Present multiple perspectives on the dragon (monster, guardian, wounded pride) without confirming yet. End Act I with a strong omen: a shadow crossing the moon, ash on the wind, and the first distant wingbeat."
+    },
+    {
+      "id": "act_2_before_the_dawn_trials",
+      "title": "Act II: Before the Dawn, the Cup Must Be Empty",
+      "purpose": "Test the party\u2019s courage through protective, non-violent challenges that prepare them for meeting Aurelion with steadiness and mercy.",
+      "narrative_summary": "As night deepens, Ashenlight\u2019s fears take shape: not as gore or destruction, but as confusion, lost people, and dangerous choices. The heroes follow the shrine\u2019s guidance to gather three \u2018quiet lights\u2019\u2014not items of power, but moments of practiced courage: (1) Shelter the vulnerable without abandoning others, (2) Speak truth when it might cause anger, (3) Refuse to answer fear with cruelty. Along the way, they encounter obstacles like blocked alleyways, a frightened watch patrol ready to arrest a scapegoat, and a rooftop fire started by a fallen lantern. Aurelion\u2019s presence is felt\u2014heat in the air, a low rumble\u2014yet the party\u2019s actions determine whether the city grows braver or turns on itself. The act culminates at the shrine, where the Empty Cup is entrusted to the heroes only if they demonstrate protection without domination.",
+      "key_elements": [
+        "Three \u2018quiet lights\u2019 (symbolic milestones of courage and mercy)",
+        "Challenges focused on rescue, de-escalation, and honest communication",
+        "A scapegoat situation: a misunderstood person blamed for the dragon\u2019s return",
+        "A small fire/hazard: solvable through teamwork and calm, not combat",
+        "Aurelion\u2019s indirect pressure: tremors, hot wind, soot, distant silhouette",
+        "The shrine ritual: a vow spoken into the empty cup",
+        "A countdown feel: bells marking the approach of dawn"
+      ],
+      "possible_player_actions": [
+        "Organize a safe shelter plan (who goes where, who checks on whom)",
+        "Talk down an armed patrol and prevent an unjust arrest",
+        "Rescue someone trapped by smoke or debris using creative tools and teamwork",
+        "Give up a resource to help others (blanket, food, time, a prized item)",
+        "Tell a difficult truth to a leader (the city\u2019s fear is the real danger)",
+        "Accept responsibility for a mistake and model repair",
+        "Perform the vow: promise to protect without threatening"
+      ],
+      "success_condition": "The heroes complete the three \u2018quiet lights\u2019 and are entrusted with the Empty Cup and the final instruction: where to meet Aurelion and how to offer peace.",
+      "failure_guidance": "If they fail a trial, let them succeed at a cost that reinforces the theme: extra people to protect, more distrust to overcome, or a tougher approach to the final meeting (Aurelion arrives more defensive). Provide opportunities to make amends immediately; never lock the story behind perfection.",
+      "dm_notes": "Frame every obstacle as solvable through empathy, bravery, and creativity. Avoid making \u201ccombat\u201d the default solution; if players initiate violence, show gentle consequences (fear spreads, someone gets hurt indirectly, trust breaks) and offer a clear off-ramp (apology, healing, surrendering weapons). Keep the pace brisk with time markers toward dawn."
+    },
+    {
+      "id": "act_3_the_empty_cup_moment",
+      "title": "Act III: The Empty Cup at Ashenlight\u2019s Edge",
+      "purpose": "Resolve the central conflict through a fearless, non-violent act of protection that invites Aurelion to choose peace, fulfilling the campaign\u2019s completion condition.",
+      "narrative_summary": "Near the city\u2019s edge\u2014by an old causeway, cliff path, or dawn-facing gate\u2014the heroes face Aurelion at last. The dragon is immense and frightening, but not depicted with graphic violence; the danger is in heat, wind, and the power of fear. Aurelion speaks (or communicates through images/feelings): the city once harmed or betrayed something the dragon loved, or Aurelion believes only fear keeps people \u2018respectful.\u2019 The heroes must protect Ashenlight without threatening Aurelion\u2014placing themselves between dragon and city, sheltering innocents, and offering the Empty Cup: nothing to bribe, nothing to steal, only the courage to be present and merciful. The \u2018empty cup\u2019 moment occurs when the heroes demonstrate protection without aggression\u2014standing firm, helping others, and offering understanding. If done sincerely, Aurelion chooses to stop threatening the city. As the first sunrise light reaches the rooftops, Ashenlight remains standing, and a safer new understanding begins.",
+      "key_elements": [
+        "Final location with strong dawn imagery (cliff, gate, causeway, high terrace)",
+        "Aurelion\u2019s presence: heat-wind, wing shadows, a voice like distant thunder",
+        "A clear moral choice: protection vs. conquest",
+        "The Empty Cup offering: a non-violent symbol of fearless mercy",
+        "Aurelion\u2019s motive: grief, pride, misunderstanding, or fear of being forgotten",
+        "A non-combat climax: dialogue, steady courage, protective positioning",
+        "Sunrise resolution: bells, warm light, soot settling, relief and quiet"
+      ],
+      "possible_player_actions": [
+        "Physically shield townsfolk and guide them to safety while refusing to attack",
+        "Offer the Empty Cup and speak a vow of protection and respect",
+        "Name Aurelion\u2019s pain without excusing harm (empathy plus boundaries)",
+        "Propose a lasting peace gesture (a memorial, a promise, a shared watch, a sanctuary)",
+        "Admit the city\u2019s past wrongs and offer repair",
+        "Refuse a leader\u2019s demand to \u2018strike first\u2019 and instead model calm bravery",
+        "Create a non-violent display of courage (standing in the open, lowering weapons, helping the frightened)"
+      ],
+      "success_condition": "Aurelion chooses to stop threatening Ashenlight after the heroes perform a fearless, non-violent act of protection (the Empty Cup moment), and the city reaches sunrise still standing and safer.",
+      "failure_guidance": "If the heroes threaten or attack, Aurelion reacts defensively: a frightening show of power (roar, gust, scorching heat) that forces a retreat but does not cause graphic harm. Offer a second chance: someone is in danger, and saving them without violence reopens dialogue. If negotiation stalls, introduce a truth-revealing detail (a symbol, old promise, or witness) that helps shift the encounter back toward understanding.",
+      "dm_notes": "Play Aurelion as capable of choice, not a \u2018boss fight.\u2019 Make courage visible: trembling hands, steady voices, stepping forward anyway. Ensure the players can \u2018win\u2019 through words and protective action; treat clever non-violent plans as strong. Close with a hopeful epilogue: the shrine\u2019s bell at dawn, a new tradition of the Empty Cup, and a concrete next-step agreement with Aurelion (boundaries, visits, or a pact of mutual protection)."
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_ashenlight_lanternward",
+      "name": "Lanternward Streets of Ashenlight",
+      "description": "Ashenlight\u2019s heart: narrow lantern-lit lanes under ash-gray rooftops, where soot falls like black snow and the dawn bells feel far away. Rumors move faster than people, and fear threatens to turn neighbors against one another.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Lantern lines strung between eaves to guide evacuations",
+        "Market square that can become a panicked crowd scene",
+        "Watch checkpoints and barricaded side-streets",
+        "Safehouse cellars marked with chalk cup symbols",
+        "Ominous heat-wind gusts and distant wing-shadows overhead"
+      ]
+    },
+    {
+      "id": "loc_shrine_of_the_beloved",
+      "name": "Shrine of the Beloved",
+      "description": "A small, gentle sanctuary tucked into an old courtyard of pale stone and quiet candles. The air is calm here even when the city trembles, and the shrine-keeper teaches that courage is protection without threat\u2014the meaning of the Empty Cup.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Altar niche with a simple, unadorned cup (the Empty Cup)",
+        "Wind chimes that ring softly when vows are spoken truthfully",
+        "Wall of remembrance for losses and reconciliations",
+        "A ritual basin used to cool soot-stung hands and steady breathing",
+        "A sealed door that opens only after acts of mercy (symbolic or literal, as desired)"
+      ]
+    },
+    {
+      "id": "loc_rooftops_and_smoke_walk",
+      "name": "Rooftops of the Smoke-Walk",
+      "description": "A slanted maze of rooftops and catwalks above the sleeping city, where fallen lanterns can spark small fires and smoke can disorient the unwary. From here the heroes can spot lost citizens, guide rescues, and feel Aurelion\u2019s presence in the hot, pulsing air.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Precarious roof-bridges and creaking ladderways",
+        "A small, spreading rooftop fire solvable by teamwork and calm",
+        "Smoke pockets that hide frightened stragglers and dropped supplies",
+        "A watch bell that can signal help\u2014or worsen panic if rung carelessly",
+        "A clear view of the horizon where a distant silhouette sometimes passes"
+      ]
+    },
+    {
+      "id": "loc_dawn_gate_causeway",
+      "name": "Dawn Gate Causeway",
+      "description": "A long stone approach at Ashenlight\u2019s edge, facing the first light of morning. Wind roars up from below, carrying ash and warmth as if the sky is breathing. This is where the city\u2019s fear meets Aurelion\u2019s power\u2014and where protection without violence can be proven.",
+      "danger_level": "Low",
+      "notable_features": [
+        "A wide, open span offering no hiding\u2014only courage and clear choices",
+        "Low parapets where heroes can physically shelter others from gusts and heat",
+        "Old oath-stones engraved with forgotten promises between city and sky",
+        "A natural \u201cvoice bowl\u201d where words carry clearly to a towering presence",
+        "Sunrise line-of-sight: the moment the first light hits the cup marks the climax"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc_captain_sera_valebright",
+      "name": "Captain Sera Valebright",
+      "role": "Captain of the Ashenlight Watch; trying to keep order during the Night of Ash",
+      "personality": "Duty-first, tired but principled; sharp-eyed, wary of panic; secretly relieved when others share the burden",
+      "motivation": "Protect civilians and prevent the city from turning fear into cruelty; keep the watch from becoming a mob with badges",
+      "possible_dialogue_hooks": [
+        "\u201cIf you want to help, don\u2019t look for someone to blame. Look for someone to carry.\u201d",
+        "\u201cI can hold a line. I can\u2019t hold a city\u2019s fear. Can you?\u201d",
+        "\u201cWe don\u2019t \u2018win\u2019 tonight by being louder than the dragon. We win by getting people to sunrise.\u201d",
+        "\u201cSomeone\u2019s being accused for the soot and the shadows. Find the truth before my patrol makes a mistake.\u201d"
+      ],
+      "interaction_flags": {
+        "trusts_party_if_they_deescalate": true,
+        "may_request_nonviolent_tasks": true,
+        "opposes_unjust_arrest": true,
+        "can_provide_safe_routes_and_watch_tokens": true
+      }
+    },
+    {
+      "id": "npc_elowen_myr_shrinekeeper",
+      "name": "Elowen Myr",
+      "role": "Shrine-keeper of the Beloved; guardian of the Empty Cup teaching",
+      "personality": "Gentle, patient, mythic in her calm; speaks in plain words with symbolic weight; unwavering about mercy with boundaries",
+      "motivation": "Guide would-be Cupbearers to courage without domination; keep the shrine from being used as a weapon or superstition-fuel",
+      "possible_dialogue_hooks": [
+        "\u201cAn empty cup is not nothing. It is hands that choose not to clutch.\u201d",
+        "\u201cBring me three quiet lights: shelter, truth, and mercy. Not trophies\u2014choices.\u201d",
+        "\u201cIf you must be brave, be brave in a way that makes room for others to breathe.\u201d",
+        "\u201cAurelion listens most when you stop trying to win.\u201d"
+      ],
+      "interaction_flags": {
+        "gatekeeps_empty_cup_until_mercy_shown": true,
+        "offers_ritual_vow_and_guidance": true,
+        "provides_clues_to_dawn_gate_causeway": true
+      }
+    },
+    {
+      "id": "npc_toma_sparks",
+      "name": "Toma 'Sparks' Rill",
+      "role": "Street child and fast messenger; first to notice wing-shadows and heat-wind signs",
+      "personality": "Quick-talking, curious, brave when protecting others; fear leaks out as jokes; eager to be believed",
+      "motivation": "Keep their little circle of neighbors safe; prove they\u2019re not \u201cjust a kid\u201d; find an adult who won\u2019t dismiss warnings",
+      "possible_dialogue_hooks": [
+        "\u201cI heard the wings\u2014like a big blanket snapping in the sky. I\u2019m not making it up.\u201d",
+        "\u201cIf the watch won\u2019t listen, maybe you will. People are getting lost in the smoke-walk.\u201d",
+        "\u201cI know the chalk cup marks. I can take you to the cellars\u2014if you promise no one gets hurt.\u201d",
+        "\u201cThey\u2019re blaming Jessa. She didn\u2019t do anything\u2014she just panicked louder than everyone else.\u201d"
+      ],
+      "interaction_flags": {
+        "can_lead_party_through_rooftops": true,
+        "triggers_scapegoat_subplot": true,
+        "responds_to_kindness_with_loyalty": true
+      }
+    },
+    {
+      "id": "npc_jessa_ironpenny",
+      "name": "Jessa Ironpenny",
+      "role": "Misunderstood tinkerer and lantern-mender; potential scapegoat during rising fear",
+      "personality": "Blunt, anxious, proud of practical skills; shuts down when accused; softens quickly when treated fairly",
+      "motivation": "Clear her name, prevent panic from becoming violence, and keep the lantern lines working so families can evacuate safely",
+      "possible_dialogue_hooks": [
+        "\u201cYes, I carry oil. That doesn\u2019t make me a dragon-caller.\u201d",
+        "\u201cIf you want someone to blame, blame the wind. Or better\u2014help me fix the lanterns.\u201d",
+        "\u201cThey\u2019re going to \u2018make an example\u2019 of me. I don\u2019t want a fight\u2014I want to go home.\u201d",
+        "\u201cI saw something on the oath-stones once\u2026 like a promise scratched over. Someone doesn\u2019t want it read.\u201d"
+      ],
+      "interaction_flags": {
+        "scapegoat_target": true,
+        "can_offer_practical_fire_safety_help": true,
+        "becomes_ally_if_protected_nonviolently": true
+      }
+    }
+  ],
+  "rewards": {
+    "completion_rewards": {
+      "currency": {
+        "bronze": 0,
+        "silver": 0,
+        "gold": 0,
+        "platinum": 0
+      },
+      "items": [
+        "{'name': 'The Empty Cup of Ashenlight (Symbolic Relic)', 'type': 'wondrous item', 'rarity': 'unique', 'description': 'A plain cup of pale stone that feels warm at sunrise. It does not hold liquid for long; what it holds best is a promise.', 'mechanical_benefit': 'Once per session, when a hero chooses a non-violent, protective action despite fear, the group may take +1 advantage/boost forward on the next roll or narrative challenge tied to calming, protecting, or negotiating. If using no dice, treat this as a guaranteed helpful twist or ally support.', 'story_hooks': ['The cup must be returned to the Dawn Shrine each year\u2014or the city\u2019s courage fades into old fear.', \"The cup is recognized by travelers as a sign: 'These are protectors, not conquerors.'\"]}",
+        "{'name': 'Cloak of Cindersoft', 'type': 'wearable', 'rarity': 'uncommon', 'description': 'A soot-gray cloak that never stains and smells faintly of rain on warm stone.', 'mechanical_benefit': 'Grants comfort and calm: once per session, reduce fear/panic in yourself or a nearby ally (remove a fear condition or negate a fright effect). Also provides light warmth and minor protection from smoke/ash.', 'story_hooks': [\"Embroidered inside: 'Be brave, be kind, be here.'\", 'Aurelion\u2019s old scale-ash is woven into the hem\u2014proof of an ancient vow.']}",
+        "{'name': 'Dawn-Bell Token', 'type': 'charm', 'rarity': 'common', 'description': 'A tiny bronze bell that rings only at first light.', 'mechanical_benefit': 'Once per adventure, ring it to summon a helpful local (messenger, guide, healer, or safehouse) in any settlement touched by Ashenlight\u2019s trade routes.', 'story_hooks': ['The bell is one of many\u2014who else holds the matching tokens?', 'Its sound is said to reach those who have sworn to protect rather than punish.']}"
+      ],
+      "story_reward": "{'title': 'Sunrise Oath: Protectors of Ashenlight', 'description': 'The heroes are publicly thanked at sunrise, not as dragon-slayers, but as keepers of courage. The city\u2019s fear loosens; people begin practicing small acts of bravery and mercy.', 'unlocks': ['A standing invitation to the Dawn Council (access to information, safe lodging, and introductions in nearby lands).', 'Aurelion\u2019s conditional truce: the dragon will not prey upon Ashenlight so long as the city honors the Oath of Protection (aid the vulnerable, never offer scapegoats).', 'A new recurring ally: the Cupbearer\u2019s Circle, a small group of youths and elders who spread hopeful stories and can deliver rumors, supplies, or sanctuary.'], 'future_complications': ['A faction in the city resents mercy and plots to break the truce to justify a hunt.', \"Aurelion asks for help with a deeper fear: something else is waking 'before the dawn.'\"]}"
+    }
+  },
+  "dm_guidance": {
+    "tone": "Encouraging and adventurous",
+    "rules": [],
+    "completion_behavior": "Celebrate the ending and state the adventure is complete."
+  },
+  "intro": "Pre-dawn clings to Ashenlight like a held breath. In the Dawn Gate Plaza, pale-glass lanterns tremble in the cold wind, and a dry fountain shaped like a cup waits at the center\u2014empty, as if it has forgotten how to be filled. Beyond the eastern gate, the road climbs into hills dusted with fresh ash, where someone swears they saw the vast shadow of Aurelion pass over the stone. The city wants shields and spears, but the oldest stories whisper something stranger: the dragon can hear courage that doesn\u2019t come with a blade. Before sunrise breaks, you are called to choose what kind of brave you will be\u2014and what you will place into an empty cup."
+}
