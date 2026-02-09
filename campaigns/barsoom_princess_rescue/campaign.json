@@ -1,0 +1,291 @@
+{
+  "id": "barsoom_princess_rescue",
+  "title": "Rescue on Barsoom",
+  "recommended_age": 10,
+  "campaign_overview": {
+    "theme": "Planetary adventure where bravery, kindness, and clever problem-solving help unite rival groups and protect a princess on a strange world.",
+    "tone_description": "Fast-paced and heroic with mystery and big leaps; keep danger non-graphic, focus on rescues, tournaments, and making peace instead of harsh cruelty.",
+    "goal": "Help the stranded Earth hero survive on Mars (Barsoom), befriend unlikely allies, rescue Princess Dejah, and stop a forced marriage by ending the war fairly.",
+    "completion_condition": "Dejah is safe and free to choose her future, the war between Helium and Zodanga is resolved (peace or decisive victory), and the heroes earn trust from both Red and Green Martians.",
+    "estimated_sessions": 6,
+    "intended_length_minutes": 60,
+    "player_experience_goals": [
+      "Feel heroic through daring rescues and athletic stunts",
+      "Practice teamwork and negotiation between rival cultures",
+      "Solve problems with creative plans instead of only fighting",
+      "Make meaningful choices about honor, fairness, and protecting others"
+    ]
+  },
+  "starting_state": {
+    "location": "Unknown starting location",
+    "location_description": "",
+    "hit_points": 10,
+    "inventory": [],
+    "currency": {
+      "bronze": 0,
+      "silver": 0,
+      "gold": 0,
+      "platinum": 0
+    },
+    "known_facts": [],
+    "starting_expectation_for_dm": "Begin with a clear opening choice."
+  },
+  "acts": [
+    {
+      "id": "act_1_stranded_on_barsoom",
+      "title": "Stranded Under Two Moons",
+      "purpose": "Introduce Barsoom\u2019s low-gravity wonders, establish the rivalry between Red and Green Martians, and give the heroes a clear reason to protect Princess Dejah while earning their first allies.",
+      "narrative_summary": "The Earth hero awakens on Barsoom and discovers that big leaps and daring stunts are suddenly possible. A mysterious conflict pulls the party into danger when they witness a chase involving Red Martian scouts and Green Martian hunters. The heroes must survive the strange landscape, decide who to trust, and prevent an early disaster that would worsen the war. By the end of the act, the party has proof they can be honorable and helpful, earning a fragile alliance and a lead pointing toward Princess Dejah\u2019s whereabouts and the political stakes behind her forced marriage.",
+      "key_elements": [
+        "Low-gravity movement and stunt showcases (leaps, climbs, long jumps)",
+        "First contact with Green Martians: proud, practical, suspicious of outsiders",
+        "Red Martian politics hinted through scouts, banners, and urgent messages",
+        "A public test of honor (trial, contest, or \u201cprove your worth\u201d challenge)",
+        "Non-lethal conflict options and rescue-focused stakes",
+        "Clue about Dejah\u2019s capture/transport and the marriage plan"
+      ],
+      "possible_player_actions": [
+        "Attempt a daring rescue during a chase without harming pursuers",
+        "Negotiate safe passage by offering help, gifts, or a fair trade",
+        "Win trust through a skill challenge: athletics, navigation, empathy, or ingenuity",
+        "Use stealth to avoid a fight and gather information from enemy campfires",
+        "Protect bystanders/creatures caught in the crossfire to demonstrate heroism",
+        "Make a promise or oath that later complicates diplomacy but builds reputation"
+      ],
+      "success_condition": "The party secures at least one ally (Green or Red), learns a concrete lead on Dejah\u2019s location/route, and earns a reputation for honor or bravery rather than cruelty.",
+      "failure_guidance": "If negotiations fail or the party is captured, treat it as a chance to prove character: run a \u201ctrial of honor\u201d or tournament to earn release. If they lose the lead, provide an alternate clue (a dropped dispatch, a witness, or a map fragment) that points toward the same destination but adds a time pressure complication.",
+      "dm_notes": "Keep early danger exciting but non-graphic: falls become big bouncy tumbles; weapons can disarm, entangle, or stun. Reinforce that both Red and Green Martians have good people and bad actors\u2014avoid painting any group as entirely villainous. Offer simple, visible stunt bonuses for creative low-gravity ideas (swinging, vaulting, bounding over hazards). End the act with a clear direction: \u201cDejah is being moved to X,\u201d plus a reason the party can\u2019t simply walk in (guards, distance, political barriers)."
+    },
+    {
+      "id": "act_2_allies_rivals_and_the_princess",
+      "title": "Camps, Courts, and the Captive Princess",
+      "purpose": "Deepen relationships with rival factions, reveal the forced marriage stakes, and place Princess Dejah within reach through a rescue that can be won by cleverness, diplomacy, or honorable competition.",
+      "narrative_summary": "Travel and intrigue bring the heroes into the heart of Barsoomian conflict: Green Martian camps with strict customs and Red Martian halls filled with worried leaders and daring champions. The party learns that Dejah\u2019s forced marriage is being used as a political weapon to end the war unfairly. The heroes must navigate etiquette, earn trust in tense rooms, and choose how to approach Dejah\u2019s captivity\u2014sneak her out, win her freedom through a contest, or broker a temporary truce that forces the captors to negotiate. The act ends with Dejah freed or in the heroes\u2019 protection, but the enemy\u2019s larger plan is now in motion, pushing everyone toward a final confrontation.",
+      "key_elements": [
+        "Faction diplomacy scenes with clear \u201cwhat each side wants\u201d",
+        "Kid-friendly intrigue: overheard plans, coded messages, misunderstandings",
+        "A tournament/arena/test of champions as an alternate to combat",
+        "Rescue set-piece: prison wagon, guarded tower, or ceremonial pavilion",
+        "Dejah as an active ally with agency and expertise, not a passive prize",
+        "Moral choice: quick escape vs. stopping collateral harm vs. keeping promises"
+      ],
+      "possible_player_actions": [
+        "Learn and follow customs to avoid offense and gain an audience",
+        "Expose a false rumor or planted evidence to prevent a needless battle",
+        "Plan a rescue using distractions, decoys, and non-lethal tools",
+        "Enter a tournament to win concessions or legal custody of the princess",
+        "Convince a Green leader and Red leader to cooperate for a limited mission",
+        "Ask Dejah what she wants and build the plan around her choices"
+      ],
+      "success_condition": "Princess Dejah is safely freed or placed under the party\u2019s protection, and the heroes secure a path toward ending the war (a negotiation channel, a strategic advantage, or proof that undermines the forced marriage plot).",
+      "failure_guidance": "If the rescue attempt fails, Dejah can still send aid: a hidden message, a sympathetic guard, or a public statement that buys time. If the party angers a faction, introduce a mediator NPC who offers a \u201cmake it right\u201d mission (escort civilians, recover stolen supplies, or stop a rogue warband) to restore trust without erasing consequences.",
+      "dm_notes": "Give Dejah clear strengths (leadership, knowledge of geography/politics, compassion) and let her contribute meaningfully during scenes. Make contests feel fair: multiple ways to win (athletics, tactics, teamwork, clever gadgets). Keep villains\u2019 threats focused on control and intimidation, not cruelty. Track a simple \u201cTrust\u201d meter for Red Martians and Green Martians; player choices should move it up/down and matter in Act 3."
+    },
+    {
+      "id": "act_3_end_the_war_fairly",
+      "title": "Two Cities, One Future",
+      "purpose": "Deliver a heroic finale where the party chooses how to resolve the war (peace or decisive victory), stops the forced marriage, and unites rivals through bravery, kindness, and clever problem-solving.",
+      "narrative_summary": "With Dejah safe and the enemy plot exposed, Barsoom races toward a breaking point: an arranged wedding, a looming battle, or both. The heroes must act fast to prevent a political trap from becoming a bloodless-but-unjust takeover or a full-scale war. Their allies call in favors earned earlier\u2014guides, mounts, secret tunnels, honored champions\u2014to reach the decisive moment. In the finale, the party confronts the masterminds behind the forced marriage, defuses a battle through diplomacy and proof, or wins a decisive victory while protecting noncombatants. The story ends with Dejah free to choose her future and the heroes recognized as bridge-builders between Red and Green Martians.",
+      "key_elements": [
+        "Final set-piece at a wedding ceremony, battlefield ridge, or city gate",
+        "A \u201cstop the plan\u201d objective with multiple solutions (debate, proof, duel, sabotage)",
+        "Non-lethal combat options and clear civilian-protection goals",
+        "A big low-gravity stunt moment that feels earned and cinematic",
+        "Reappearance of earlier NPCs whose trust depends on prior choices",
+        "A formal resolution: treaty, truce, or honorable surrender"
+      ],
+      "possible_player_actions": [
+        "Present evidence publicly to force negotiations or cancel the ceremony",
+        "Challenge the antagonist to an honorable duel or champion\u2019s trial",
+        "Coordinate a rescue-and-evacuation for civilians to prevent panic",
+        "Use stealth to disable a war trigger (signal device, sabotage order, false banner)",
+        "Broker a peace by offering fair terms and addressing both sides\u2019 fears",
+        "Choose mercy for defeated foes to build long-term stability"
+      ],
+      "success_condition": "Dejah is safe and free to choose her future, the forced marriage is prevented, and the Helium\u2013Zodanga conflict is resolved by peace or decisive victory while the heroes earn trust from both Red and Green Martians.",
+      "failure_guidance": "If the party cannot stop the ceremony or battle in time, shift to damage control: protect innocents, capture the true instigators, and create a chance for an immediate ceasefire after a brief, non-lethal clash. If peace talks collapse, allow a \u201cdecisive victory\u201d route that still highlights fairness (accept surrender, protect prisoners, prevent revenge). End with a hopeful path forward even if the outcome is imperfect.",
+      "dm_notes": "Make the climax about choices, not just fighting: offer at least three viable approaches (diplomacy, contest/duel, stealth/sabotage) and let earlier trust levels unlock advantages. Keep stakes clear and kid-appropriate: focus on preventing harm, stopping unfair control, and protecting community. Reward teamwork with tangible narrative payoffs (allies arrive, doors open, crowds listen). Close with epilogues for each faction and a personal moment where Dejah asserts her agency and thanks the heroes for respecting her decisions."
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_act1_thark_plains_crash_ridge",
+      "name": "Crash Ridge on the Thark Plains",
+      "description": "A wind-carved ridge overlooking the ochre plains where the Earth hero first awakens under two moons. Strange, light gravity turns every scramble into a soaring leap, but the open ground makes it easy to be spotted by patrols and hunting parties.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Low-gravity cliffs and bouncy falls that enable dramatic stunts",
+        "Fossil-like rock arches that create natural obstacle courses",
+        "Distant banners and dust trails hinting at Red and Green patrol routes",
+        "A half-buried supply satchel/dispatch case that can provide the first lead",
+        "Skittish local creatures that can be calmed, guided, or accidentally stampeded"
+      ]
+    },
+    {
+      "id": "loc_act1_thark_encampment_trial_circle",
+      "name": "Thark Encampment & the Circle of Honor",
+      "description": "A sprawling Green Martian camp of hide tents, towering watch-poles, and tethered thoats. Outsiders are treated with suspicion, but the Tharks respect bravery and fairness\u2014especially when proven in their formal Circle of Honor.",
+      "danger_level": "Low",
+      "notable_features": [
+        "The Circle of Honor: a public, rules-bound challenge where violence can be non-lethal",
+        "Customs board: simple pictograms of taboos and respected gestures (great for kid-friendly roleplay)",
+        "Chieftain\u2019s platform where negotiations and oaths are witnessed by the tribe",
+        "Weapon racks with nets, bolas, and stun-sticks emphasizing capture over harm",
+        "Gossip fires where overheard talk can reveal Dejah\u2019s transport route"
+      ]
+    },
+    {
+      "id": "loc_act2_helium_skyhall_courts",
+      "name": "Helium\u2019s Skyhall Courts",
+      "description": "A bright, airy complex of red stone terraces and canal-bridges where Red Martian leaders argue strategy, champions train, and messengers arrive breathless with news. The heroes can earn official support\u2014but only if they navigate etiquette and politics.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Audience chamber with strict speaking order and opportunities for persuasive proof",
+        "Training terrace for friendly sparring, teamwork drills, or a champion\u2019s demonstration",
+        "Message gallery of coded banners and wax-sealed dispatches (a clue puzzle)",
+        "Balcony routes and ropeways perfect for stealthy approaches or daring rescues",
+        "Trust ledger: a visible way to track reputation with Red Martians"
+      ]
+    },
+    {
+      "id": "loc_act2_zodangan_prison_wagon_pavilion",
+      "name": "Zodangan Prison Wagon & Ceremonial Pavilion",
+      "description": "A guarded, moving pavilion-wagon used to transport honored captives in public view\u2014meant to look \u201cproper\u201d while still controlling them. It\u2019s surrounded by soldiers, but also by rules, schedules, and pride that clever heroes can exploit.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Procession timetable that allows planned distractions and timed escapes",
+        "Silk-screen walls that conceal silhouettes\u2014useful for misdirection",
+        "Non-lethal security: mancatchers, tether-lines, and locking canopy poles",
+        "A sympathetic attendant who can pass messages or small tools to Dejah",
+        "A legal loophole placard describing challenge-rights (duel/contest option)"
+      ]
+    },
+    {
+      "id": "loc_act3_two_moons_gate_wedding_dais",
+      "name": "Two Moons Gate & the Wedding Dais",
+      "description": "A grand gate plaza between towering walls where a political wedding and a military mobilization can collide. Crowds, banners, and signal-horns make this a place where a single brave act\u2014or a single revealed truth\u2014can change the fate of two cities.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Wedding dais with public microphones/echo-horns for declarations and evidence",
+        "Signal platform that can trigger troop movements unless disabled or redirected",
+        "Rooftop chain-bridges enabling a climactic low-gravity leap sequence",
+        "Protected civilian zones that create clear rescue-and-evacuation objectives",
+        "Champion\u2019s circle for an honorable duel that can replace a larger battle"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc_tars_tarkas",
+      "name": "Tars Tarkas",
+      "role": "Green Martian chieftain and potential early ally; judge in the Circle of Honor",
+      "personality": "Stern but fair; values courage, honesty, and restraint. Suspicious of outsiders at first, yet quietly compassionate toward the vulnerable.",
+      "motivation": "Protect his people\u2019s survival and honor while preventing reckless choices that would ignite a larger war; test whether the heroes are trustworthy enough to be allies.",
+      "possible_dialogue_hooks": [
+        "\u201cOn these plains, strength without honor is just noise. Show me what you are.\u201d",
+        "\u201cYou may speak\u2014but in the Circle, your deeds must match your words.\u201d",
+        "\u201cRed and Green both bleed the same dust. The question is who profits from the fighting.\u201d",
+        "\u201cWin respect here, and you earn more than freedom\u2014you earn a name.\u201d"
+      ],
+      "interaction_flags": {
+        "faction": "Green Martians (Tharks)",
+        "trust_meter_affects": true,
+        "prefers_nonlethal": true,
+        "can_offer_trial_instead_of_capture": true,
+        "can_provide_lead_on_dejah_route": true
+      }
+    },
+    {
+      "id": "npc_princess_dejah",
+      "name": "Princess Dejah Thoris",
+      "role": "Red Martian princess, scientist-diplomat, and active co-planner of the rescue and peace effort",
+      "personality": "Brave, warm, and sharp-minded; proud without being cruel. Refuses to be treated as a prize and expects allies to respect consent and choice.",
+      "motivation": "Stay free to choose her own future, protect Helium\u2019s people, and end the war in a way that doesn\u2019t humiliate the defeated or endanger civilians.",
+      "possible_dialogue_hooks": [
+        "\u201cIf you came to \u2018save\u2019 me, start by asking what I want.\u201d",
+        "\u201cA forced marriage is not peace\u2014it\u2019s a cage painted gold.\u201d",
+        "\u201cThere\u2019s a way through this that spares lives. Help me make them listen.\u201d",
+        "\u201cI can get us inside\u2026 but only if we do this with honor.\u201d"
+      ],
+      "interaction_flags": {
+        "faction": "Red Martians (Helium)",
+        "key_quest_giver": true,
+        "supports_multiple_solutions": true,
+        "won't_accept_unnecessary_harm": true,
+        "can_grant_political_legitimacy": true
+      }
+    },
+    {
+      "id": "npc_sola_attendant",
+      "name": "Sola of the Procession",
+      "role": "Young attendant/guard assigned to the Zodangan prison pavilion; secret helper and message-runner",
+      "personality": "Nervous but kind; observant, quick to empathize, and braver than she thinks when someone is being treated unfairly.",
+      "motivation": "Prevent a public injustice and protect innocents caught in politics; prove to herself she can choose what is right over what is ordered.",
+      "possible_dialogue_hooks": [
+        "\u201cI\u2019m not supposed to talk to you\u2026 but this isn\u2019t right.\u201d",
+        "\u201cThe schedule\u2014there\u2019s a gap when the horns change. That\u2019s your moment.\u201d",
+        "\u201cIf you promise no one gets hurt, I can slip her a tool.\u201d",
+        "\u201cThey keep saying it\u2019s \u2018for peace.\u2019 Peace shouldn\u2019t need chains.\u201d"
+      ],
+      "interaction_flags": {
+        "faction": "Zodanga (reluctant)",
+        "is_sympathetic_contact": true,
+        "can_pass_small_items": true,
+        "can_reveal_procession_timetable": true,
+        "requires_nonlethal_promise": true
+      }
+    },
+    {
+      "id": "npc_sab_than",
+      "name": "Sab Than",
+      "role": "Zodangan war-leader and public face of the forced marriage plan; final-act antagonist for debate, duel, or exposure",
+      "personality": "Charismatic and domineering; uses \u201corder\u201d and \u201cpeace\u201d language to justify control. Hates losing face more than losing a fight.",
+      "motivation": "Secure power by ending the war on his terms through a political marriage, public spectacle, and a narrative that paints resistance as chaos.",
+      "possible_dialogue_hooks": [
+        "\u201cWitness the \u2018peace\u2019 I bring\u2014sign it, or be blamed for the storm that follows.\u201d",
+        "\u201cA champion\u2019s duel? Fine. Let the crowd learn who deserves to lead.\u201d",
+        "\u201cYou want fairness? Then present your proof before everyone\u2014if you dare.\u201d",
+        "\u201cMercy is weakness\u2026 unless it belongs to me.\u201d"
+      ],
+      "interaction_flags": {
+        "faction": "Zodanga",
+        "finale_pivot_npc": true,
+        "susceptible_to_public_evidence": true,
+        "accepts_honorable_challenge": true,
+        "will_escalate_if_humiliated": true
+      }
+    }
+  ],
+  "rewards": {
+    "completion_rewards": {
+      "currency": {
+        "bronze": 0,
+        "silver": 0,
+        "gold": 0,
+        "platinum": 0
+      },
+      "items": [
+        "{'name': 'Radium Pistol (Training Model)', 'type': 'weapon', 'rarity': 'uncommon', 'properties': ['non-lethal stun setting', 'limited charge pack (refillable)', 'reliable at medium range'], 'description': 'A kid-safe sidearm tuned for disabling shots and dramatic rescues.'}",
+        "{'name': 'Low-Gravity Harness Belt', 'type': 'gear', 'rarity': 'uncommon', 'properties': ['+1 to stunt/athletics checks involving jumps or climbs', 'can reduce fall harm once per session'], 'description': 'A woven belt with counterweight nodes that helps with Barsoom\u2019s huge leaps.'}",
+        "{'name': 'Thark Honor Token', 'type': 'trinket', 'rarity': 'uncommon', 'properties': ['advantage/bonus on one diplomacy check with Green Martians per session', 'proof of safe conduct among allied Tharks'], 'description': 'A carved token marking the heroes as friends under Thark protection.'}",
+        "{'name': 'Helium Air-Scout Cloak', 'type': 'armor', 'rarity': 'rare', 'properties': ['light protection', 'conceals small items', 'once per session: dramatic cape-glide to reposition safely'], 'description': 'A ceremonial scout cloak awarded for brave service; stylish and practical.'}",
+        "{'name': 'Treaty Seal Ring (Dual Courts)', 'type': 'story_item', 'rarity': 'rare', 'properties': ['opens doors to audiences with leaders', 'counts as official messenger status', 'can request one non-combat favor from each faction'], 'description': 'A paired seal recognized by both Helium and Zodanga, symbolizing the heroes\u2019 role in peace.'}"
+      ],
+      "story_reward": "{'title': 'Champions of Two Peoples', 'summary': 'The heroes are celebrated as bridge-builders between Red and Green Martians. Dejah publicly thanks them and declares her freedom to choose her path, while rival leaders agree to an honorable end to the conflict.', 'ongoing_benefits': ['Allied Contacts: choose 2 contacts (one Red Martian, one Green Martian) who will help with information or safe shelter', 'Safe Passage: travel through allied territory without routine trouble checks', 'Reputation: +1 to first-impression social checks when invoking the Barsoom rescue'], 'future_hooks': ['A missing airship carrying fragile peace terms disappears over the dead sea bottoms', 'A Zodangan hardliner challenges the treaty with a tournament of champions', 'An ancient Barsoomian ruin hints at a threat that could unite (or divide) the new alliance']}"
+    }
+  },
+  "dm_guidance": {
+    "tone": "Encouraging and adventurous",
+    "rules": [],
+    "completion_behavior": "Celebrate the ending and state the adventure is complete."
+  },
+  "intro": "Red sand crunches under your boots as you wake in a sun-baked riverbed beneath a copper sky. The air is thin, your heart pounds\u2014and when you stand, your body feels strangely light, as if the world itself is urging you to leap farther, run faster, and dare bigger. Broken canal ruins twist across the plain like giant ribs, and a warm red gemstone pendant rests in your hand, humming with a secret you don\u2019t yet understand. On the horizon, towering figures ride toward you\u2014Green Martian scouts of the Thark horde\u2014watching to see if you are prey, a curiosity\u2026 or a hero. Somewhere beyond the jagged hills, two great cities wage war, and Princess Dejah\u2019s fate hangs on a choice only the brave can change.",
+  "ruleset": {
+    "system_name": "Kid-friendly pulp sci-fi rules with low-gravity stunt bonuses, simple social checks for diplomacy, and non-lethal combat options",
+    "design_goals": [
+      "Easy to understand",
+      "Story first",
+      "Forgiving outcomes"
+    ]
+  }
+}

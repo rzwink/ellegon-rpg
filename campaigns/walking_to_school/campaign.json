@@ -1,0 +1,261 @@
+{
+  "id": "the_742_walk",
+  "title": "The 7:42 Walk",
+  "recommended_age": 9,
+  "campaign_overview": {
+    "theme": "Everyday friendship, routines, and noticing small changes that matter",
+    "tone_description": "Gentle, grounded, and quietly meaningful; low-stakes scenes with warm realism and a focus on feelings, choices, and observation.",
+    "goal": "Walk to school together while noticing the neighborhood, checking in with friends, and making one small kind choice that improves someone\u2019s morning.",
+    "completion_condition": "The group arrives at Larson Middle School and, before going inside, shares one thing they noticed and one helpful choice they made (or tried) during the walk.",
+    "estimated_sessions": 2,
+    "intended_length_minutes": 60,
+    "player_experience_goals": [
+      "Practice roleplay through realistic kid-to-kid conversations",
+      "Spot clues and story hooks from ordinary details in the neighborhood",
+      "Make cooperative choices that support friends and siblings",
+      "Explore emotions (worry, curiosity, anticipation) in a safe, low-conflict adventure"
+    ]
+  },
+  "starting_state": {
+    "location": "Unknown starting location",
+    "location_description": "",
+    "hit_points": 10,
+    "inventory": [],
+    "currency": {
+      "bronze": 0,
+      "silver": 0,
+      "gold": 0,
+      "platinum": 0
+    },
+    "known_facts": [],
+    "starting_expectation_for_dm": "Begin with a clear opening choice."
+  },
+  "acts": [
+    {
+      "id": "act_1",
+      "title": "7:42 on the Dot",
+      "purpose": "Establish the morning routine, introduce the walking group, and prompt players to start noticing small changes in familiar places.",
+      "narrative_summary": "It\u2019s a normal school morning, timed to the familiar 7:42 departure. The group meets at the usual spot and starts down the neighborhood route. Everything feels ordinary\u2014until the players realize a few tiny details are different today: a porch light still on, an uncollected newspaper, a new flyer on a pole, a friend acting slightly off, or a sound that doesn\u2019t belong. Nothing is dangerous, but the changes invite curiosity and caring. Early choices set the tone: who walks with whom, who gets listened to, and whether anyone slows down to help.",
+      "key_elements": [
+        "The usual meetup spot (driveway, corner, or mailbox) and the familiar 7:42 routine",
+        "A friend or sibling who is quieter than usual (worry, embarrassment, distraction)",
+        "At least three subtle neighborhood changes (new sign, missing item, unusual smell/sound, closed blinds, dropped backpack strap)",
+        "A gentle time pressure (if they dawdle too long, they risk being late\u2014but it\u2019s not catastrophic)",
+        "Opportunities for small kindness (holding a door/gate, helping tie a shoe, sharing an umbrella, giving someone space)"
+      ],
+      "possible_player_actions": [
+        "Check in with a friend: ask how they\u2019re doing and actually wait for the answer",
+        "Compare observations: point out something that seems different and ask others what they think",
+        "Decide the walking order/pairs to include someone who might otherwise be left out",
+        "Help with a practical problem (lost homework sheet, broken zipper, forgotten lunch, shoelace)",
+        "Choose whether to investigate a small odd detail (without turning it into a big crisis)",
+        "Set a group intention: 'Let\u2019s all notice one thing and do one kind thing today.'"
+      ],
+      "success_condition": "The group begins the walk together with at least one meaningful check-in and at least one noticed change in the neighborhood.",
+      "failure_guidance": "If players ignore all hooks or rush, have the quiet friend clearly ask for a moment, or introduce an unavoidable small problem (e.g., a dropped notebook spills, a younger sibling lags behind) that invites kindness without forcing it. Keep consequences gentle: mild awkwardness or regret, not punishment.",
+      "dm_notes": "Keep the tone grounded and warm. Offer 2\u20134 small details and let players choose which matter. If using optional checks, treat them as prompts: noticing reveals feelings or context; kindness checks determine how a gesture is received. Avoid escalating to danger\u2014this is about attention, empathy, and routine."
+    },
+    {
+      "id": "act_2",
+      "title": "The In-Between Blocks",
+      "purpose": "Deepen relationships through conversations and choices; present a small, solvable morning snag that encourages cooperative problem-solving and kindness.",
+      "narrative_summary": "Midway through the route, the walk naturally breaks into little conversations: who\u2019s worried about a quiz, who\u2019s excited about art class, who\u2019s annoyed about something at home. Meanwhile, one small situation appears that needs a decision: a neighbor struggling with grocery bags, a lost dog with a friendly tag, a kid sitting on steps looking upset, a poster that fell and needs re-taping, or a spilled drink that could make someone slip. The group must decide how to help while managing time and feelings. The most important outcome isn\u2019t a perfect fix\u2014it\u2019s the attempt, and doing it together in a respectful way.",
+      "key_elements": [
+        "A crossroads moment where the group could take the usual route or a slightly different one",
+        "A low-stakes snag that can be helped in multiple ways (practical, social, or emotional)",
+        "A conversation prompt tied to school (test, presentation, friendship worry, new student, club tryouts)",
+        "A chance for inclusion (invite a hesitant classmate to walk with them for a block)",
+        "A subtle consequence of choices (arrive a bit later, feel more connected, learn a small detail about someone\u2019s morning)"
+      ],
+      "possible_player_actions": [
+        "Offer help directly and politely: ask first, don\u2019t assume",
+        "Delegate tasks (one person helps, one keeps an eye on time, one comforts someone)",
+        "Problem-solve creatively with everyday items (tape, string, phone call to a parent, reading a tag, returning a dropped item)",
+        "Mediate a small disagreement within the group (apologies, compromises, taking turns speaking)",
+        "Choose to take the longer/shorter route based on priorities (helping vs. punctuality)",
+        "Notice and name emotions: 'You seem stressed\u2014want to talk or want quiet?'"
+      ],
+      "success_condition": "The players make (or clearly attempt) one small kind choice that improves someone\u2019s morning, and the group stays together enough to continue toward school.",
+      "failure_guidance": "If the group argues or splits, reunite them with a natural pause point (stoplight, crosswalk, school bell sound in the distance). If they choose not to help, show a gentle mirror: someone else helps instead, prompting reflection rather than guilt. If time becomes an issue, let them arrive just as the warning bell rings\u2014still okay, but it adds urgency to wrap up.",
+      "dm_notes": "Aim for one central snag and one optional micro-moment. Encourage players to speak in character, but keep scenes short and flowing like a real walk. Reward listening and inclusion with small positive shifts (a friend opens up, someone smiles, a tense mood eases)."
+    },
+    {
+      "id": "act_3",
+      "title": "Larson Middle, Before the Doors",
+      "purpose": "Provide a calm wrap-up at the school entrance where players reflect on observations and kindness, completing the story goal.",
+      "narrative_summary": "The school comes into view: buses, bikes, chatter, the familiar building. The group reaches the front area before going inside. This is a small quiet pocket in the morning rush\u2014a chance to pause, breathe, and notice what they learned on the way. The players share one thing they noticed (a change in the neighborhood or a feeling in a friend) and one helpful choice they made or tried. The walk ends not with a big twist, but with a sense that small choices matter and routines can hold meaning.",
+      "key_elements": [
+        "The school approach: crosswalk, bike rack, front steps, morning supervision",
+        "A final tiny detail that echoes earlier noticing (a poster matching the flyer, a friend\u2019s mood shift, a neighbor waving)",
+        "A short reflection circle: one notice + one kindness per player",
+        "A gentle emotional beat (gratitude, relief, pride, curiosity for tomorrow)",
+        "A clear transition into the school day (bell, doors opening, friends splitting to lockers)"
+      ],
+      "possible_player_actions": [
+        "Share reflections: one noticed change and one helpful choice (or attempt)",
+        "Thank someone in the group for something specific",
+        "Apologize for a small misstep and repair it",
+        "Make a small plan for tomorrow (check on someone, take a different route, bring tape/snacks)",
+        "Decide how to enter school (walk together to lockers, split up, include someone new)"
+      ],
+      "success_condition": "The group arrives at Larson Middle School and, before going inside, each player shares one thing they noticed and one helpful choice they made or tried during the walk.",
+      "failure_guidance": "If players resist sharing, offer prompts: 'What\u2019s one small thing you didn\u2019t expect to see today?' or 'What\u2019s one moment you felt proud or unsure?' If someone made no kindness choice, let them name a missed chance and a plan to do better later\u2014count the intention and reflection as progress.",
+      "dm_notes": "Keep the ending simple and affirming. The goal is reflection, not perfection. If you want a hook for a future session, end with one new ordinary detail (a new student at the gate, a bulletin-board notice, a missing poster) that invites tomorrow\u2019s noticing without raising stakes."
+    }
+  ],
+  "locations": [
+    {
+      "id": "loc_meetup_corner_mailbox",
+      "name": "The 7:42 Meetup Corner",
+      "description": "The familiar starting spot\u2014by the shared mailbox cluster and a cracked sidewalk corner\u2014where the group always gathers before walking to school. Today it feels the same, but a few tiny details are off: a porch light still glowing, an uncollected newspaper, and a fresh flyer taped slightly crooked to a utility pole.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Mailbox cluster and low stone wall that naturally forms a \u2018hangout\u2019 edge",
+        "Utility pole with a new flyer/poster (slightly crooked, recently added)",
+        "Subtle morning oddities nearby (porch light on, newspaper still out, closed blinds)",
+        "Natural conversation space for check-ins and choosing walking pairs",
+        "Gentle time cue: the routine of leaving at exactly 7:42"
+      ]
+    },
+    {
+      "id": "loc_inbetween_blocks_crossroads",
+      "name": "The In-Between Blocks Crossroads",
+      "description": "A mid-route intersection where the neighborhood opens up: a crosswalk, a small strip of grass, and two equally familiar ways to go. It\u2019s a natural place for the group to split into side conversations\u2014and for a small, solvable snag to appear that invites cooperation without turning the morning into a crisis.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Two route options (usual path vs. slightly longer/quiet alternative)",
+        "Crosswalk button and \u2018WAIT\u2019 sign that forces a brief pause and regroup",
+        "Space for a low-stakes snag (spilled drink, dropped papers, fallen poster, lost dog with tag, neighbor with grocery bags)",
+        "Bench/steps where someone might sit looking upset or overwhelmed",
+        "Ambient clues that reward noticing (odd sound, new smell like fresh mulch, missing yard decoration)"
+      ]
+    },
+    {
+      "id": "loc_maple_mini_mart_front",
+      "name": "Maple Mini-Mart & Community Board",
+      "description": "A tiny corner store with foggy windows, a bell on the door, and a corkboard plastered with neighborhood notes. Kids pass it all the time, but today one notice stands out\u2014a matching flyer, a torn edge, or a message that connects to what the group saw earlier\u2014making it a perfect place to compare observations and decide on a small kind action.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Community corkboard with overlapping flyers (one new, one missing, one partly torn)",
+        "Storefront overhang that shelters the group briefly from light rain or wind",
+        "Owner or early customer who can react warmly to polite help",
+        "Everyday problem-solving resources nearby (tape behind the counter, spare string, a pen, a phone to call a parent)",
+        "Opportunity for inclusion (inviting a hesitant classmate to walk the next block)"
+      ]
+    },
+    {
+      "id": "loc_larson_middle_front_steps",
+      "name": "Larson Middle\u2014Front Steps Before the Doors",
+      "description": "The school approach\u2014bike racks, morning chatter, and the front steps where the group can pause just before the day begins. It\u2019s busy but not harsh, and it offers a small pocket of calm where everyone can share what they noticed and one helpful choice they made (or tried) during the walk.",
+      "danger_level": "Low",
+      "notable_features": [
+        "Crosswalk and morning supervisor presence (structure without pressure)",
+        "Bike rack area and front steps that create a natural \u2018reflection circle\u2019 spot",
+        "A final echo detail (a matching poster, a neighbor waving, a friend\u2019s mood shift becoming visible)",
+        "Audible time marker: the warning bell growing closer",
+        "Clear transition point into the school day (doors opening, friends splitting toward lockers)"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc_maya_rivera",
+      "name": "Maya Rivera",
+      "role": "Walking-group friend; the one who notices little changes first",
+      "personality": "Observant, gentle, slightly anxious about being late; speaks carefully and listens well",
+      "motivation": "Keep the routine steady while making sure nobody in the group feels left out or ignored",
+      "possible_dialogue_hooks": [
+        "\u201cDo you see that? Mrs. Kline\u2019s porch light is still on\u2026 it usually isn\u2019t.\u201d",
+        "\u201cIf we\u2019re going to help, can we do it together and still make it by the warning bell?\u201d",
+        "\u201cYou got quiet all of a sudden. Want to talk, or want someone to just walk with you?\u201d",
+        "\u201cOkay, everyone: one thing you noticed so far. I\u2019ll go first.\u201d"
+      ],
+      "interaction_flags": {
+        "prefers_low_conflict": true,
+        "responds_to_kindness": "opens up and shares more observations",
+        "time_pressure_sensitive": true
+      }
+    },
+    {
+      "id": "npc_jalen_brooks",
+      "name": "Jalen Brooks",
+      "role": "Classmate on the route; quiet today and a little embarrassed",
+      "personality": "Normally funny and talkative; today distracted, guarded, and quick to change the subject",
+      "motivation": "Avoid attention while dealing with a small morning problem (forgotten homework, broken zipper, or a note from home) and fear of being judged",
+      "possible_dialogue_hooks": [
+        "\u201cI\u2019m fine. Can we just\u2026 keep walking?\u201d",
+        "\u201cDid you guys hear that weird rattling sound back by the corner?\u201d",
+        "\u201cIf I\u2019m late again, my first-period teacher is going to do the look.\u201d",
+        "\u201cHey\u2014can you not tell anyone about this? It\u2019s not a big deal.\u201d"
+      ],
+      "interaction_flags": {
+        "needs_check_in": true,
+        "trust_builds_with_listening": true,
+        "may_decline_help_once": true
+      }
+    },
+    {
+      "id": "npc_mrs_patel",
+      "name": "Mrs. Patel",
+      "role": "Maple Mini-Mart owner; steady adult presence with small, practical resources",
+      "personality": "Warm, brisk, and attentive; treats kids with respect and expects polite honesty",
+      "motivation": "Keep the morning running smoothly and encourage small acts of community care",
+      "possible_dialogue_hooks": [
+        "\u201cMorning, you two\u2014what\u2019s got you all clustered up out front?\u201d",
+        "\u201cIf that poster fell, I\u2019ve got tape behind the counter. You\u2019ll have to do the straightening.\u201d",
+        "\u201cLost dog? Read me the tag\u2014slowly. We\u2019ll figure out who to call.\u201d",
+        "\u201cKindness counts, even when you\u2019re in a hurry. Especially then.\u201d"
+      ],
+      "interaction_flags": {
+        "has_supplies": [
+          "tape",
+          "pen",
+          "string",
+          "paper_towel"
+        ],
+        "will_contact_parent_if_asked": true,
+        "rewards_politeness": "offers quick help and a sincere thanks"
+      }
+    },
+    {
+      "id": "npc_mr_dawson",
+      "name": "Mr. Dawson",
+      "role": "Morning crosswalk supervisor near Larson Middle; gentle authority at the end of the walk",
+      "personality": "Calm, steady, lightly humorous; notices who\u2019s included and who\u2019s trailing behind",
+      "motivation": "Get students safely and calmly into the school day while reinforcing good choices",
+      "possible_dialogue_hooks": [
+        "\u201cMorning, team. Everybody accounted for?\u201d",
+        "\u201cI like how you\u2019re walking\u2014room for everyone, no one getting shoved to the curb.\u201d",
+        "\u201cYou look like you solved a problem on the way. What was it?\u201d",
+        "\u201cBefore you head in\u2014take ten seconds. What\u2019s one thing you noticed today?\u201d"
+      ],
+      "interaction_flags": {
+        "can_prompt_reflection": true,
+        "deescalates_disagreements": true,
+        "safety_first": true
+      }
+    }
+  ],
+  "rewards": {
+    "completion_rewards": {
+      "currency": {
+        "bronze": 0,
+        "silver": 0,
+        "gold": 0,
+        "platinum": 0
+      },
+      "items": [
+        "{'name': 'Extra-Point Pencil', 'type': 'Everyday item', 'quantity_per_party': 1, 'effect': 'Once in a later scene at school, a player can declare they have a spare pencil/eraser to share, turning a minor problem into a solved one (and improving an NPC\u2019s mood).'}",
+        "{'name': 'Warm Note Sticker Sheet', 'type': 'Consumable', 'quantity_per_player': 1, 'effect': 'Use once to leave an anonymous encouraging note (locker, notebook, lunch bag). Grants +1 on the next social check with the recipient or someone who witnesses it.'}",
+        "{'name': 'Neighborhood Map Doodle', 'type': 'Clue/item', 'quantity_per_party': 1, 'effect': \"A hand-drawn map marking 3 'small-change' spots noticed on the walk (e.g., a new 'For Sale' sign, a broken sprinkler, a stray cat route). Provides one free prompt/hint for a future slice-of-life mystery.\"}"
+      ],
+      "story_reward": "{'title': 'The Morning Noticers', 'summary': 'The group becomes known (quietly) as kids who pay attention and show up for people. Friendly adults and classmates start sharing little bits of information with them more readily.', 'unlocks': ['A recurring NPC (crossing guard, librarian, neighbor, or older sibling) who offers gentle guidance or small favors', \"A new low-stakes story thread: 'What changed on Glenn Avenue this week?'\", 'A standing invitation: sit together at lunch for one scene to check in and plan a small kindness'], 'lasting_benefit': \"Once per session, the party may ask the GM one 'What did we notice that matters?' question and receive a helpful, grounded clue.\"}"
+    }
+  },
+  "dm_guidance": {
+    "tone": "Encouraging and adventurous",
+    "rules": [],
+    "completion_behavior": "Celebrate the ending and state the adventure is complete."
+  },
+  "intro": "It\u2019s 7:42 AM\u2014exactly\u2014and Grandview Neighborhood is doing its usual weekday thing: sprinklers ticking, porch lights still glowing, and the damp sidewalk catching the early light. Backpacks bump against shoulders as you gather at the end of the driveway at Glenn Ave, the spot you always meet before walking to Larson Middle School. Everything looks normal\u2026 which makes the small differences stand out: a familiar yard that\u2019s slightly wrong, a neighbor who seems stuck with something, a friend who\u2019s quieter than usual, a tiny problem that could turn into a big feeling if nobody notices. It\u2019s just a walk to school\u2014but today, paying attention might be the most important thing you do all morning."
+}
