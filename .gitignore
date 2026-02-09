@@ -4,3 +4,4 @@ saves/*
 .idea/
 __pycache__
 debug_audio
+debug_tts
