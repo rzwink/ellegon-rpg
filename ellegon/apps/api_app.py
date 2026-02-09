@@ -31,7 +31,9 @@ ALLOWED_ORIGINS = {
     "https://0f77f499-700f-4ab2-b835-95a36e93d329.lovableproject.com",
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://id-preview--0f77f499-700f-4ab2-b835-95a36e93d329.lovable.app"
+    "https://id-preview--0f77f499-700f-4ab2-b835-95a36e93d329.lovable.app",
+    "https://ellegon.zwink.net",
+    "https://ellegon.lovable.app"
 }
 
 load_dotenv()

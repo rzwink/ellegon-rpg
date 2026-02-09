@@ -28,6 +28,13 @@ class TextToSpeech(Protocol):
         ...
 
 
+def dm_voice(text: str) -> str:
+    return (
+    "Dungeon Master narration. Deep, cinematic voice. "
+    "Slow pacing. Dramatic pauses. Tone of ancient mystery.\n\n"
+    + text
+    )
+
 @dataclass
 class OpenAITTS:
     client: Optional[object] = None
@@ -53,6 +60,8 @@ class OpenAITTS:
         response = self._client().audio.speech.create(
             model=model or self.model,
             voice=voice or self.voice,
+            instructions="Dungeon Master narration. Deep, cinematic voice. Slow pacing. Dramatic pauses. Tone of ancient mystery.",
+
             input=text,
             response_format=audio_format or self.audio_format,
         )
@@ -76,6 +85,7 @@ class OpenAITTS:
         stream = self._client().audio.speech.with_streaming_response.create(
             model=model or self.model,
             voice=voice or self.voice,
+            instructions="Dungeon Master narration. Deep, cinematic voice. Slow pacing. Dramatic pauses. Tone of ancient mystery.",
             input=text,
             response_format=audio_format or self.audio_format,
         )
