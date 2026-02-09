@@ -24,11 +24,14 @@ from ellegon.speech.stt import OpenAITranscriber, SpeechToText
 from ellegon.speech.tts import OpenAITTS, TextToSpeech
 from ellegon.service.engine import Engine
 from ellegon.sessions.persistence import load_or_create_save
+import hashlib
+from datetime import datetime, timezone
 
 ALLOWED_ORIGINS = {
     "https://0f77f499-700f-4ab2-b835-95a36e93d329.lovableproject.com",
     "http://localhost:5173",
     "http://localhost:3000",
+    "https://id-preview--0f77f499-700f-4ab2-b835-95a36e93d329.lovable.app"
 }
 
 load_dotenv()
@@ -91,6 +94,22 @@ class SessionResponse(BaseModel):
     turn: int
     progress: dict
     dm_text: Optional[str] = None
+
+
+
+def _utc_ts() -> str:
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ")
+
+def _tts_debug_dir() -> Path:
+    p = Path("debug_tts")
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+def _write_debug_tts(audio_bytes: bytes, *, prefix: str, ext: str) -> Path:
+    digest = hashlib.sha1(audio_bytes).hexdigest()[:10]
+    path = _tts_debug_dir() / f"{prefix}_{_utc_ts()}_{digest}.{ext}"
+    path.write_bytes(audio_bytes)
+    return path
 
 
 def _list_campaigns(campaigns_root: Optional[Path]) -> list[str]:
@@ -382,19 +401,66 @@ def create_app(
                 ),
             )
 
+        from fastapi.responses import StreamingResponse
+        from urllib.parse import unquote
+
+        @app.get("/tts")
+        def tts_stream(
+                text: str,
+                voice: Optional[str] = None,
+                model: Optional[str] = None,
+                audio_format: str = "mp3",
+        ):
+            audio_format = (audio_format or "mp3").lower()
+            if audio_format != "mp3":
+                raise HTTPException(status_code=400, detail="Use audio_format=mp3 for browser compatibility.")
+
+            def gen():
+                collected = bytearray()
+                for chunk in app.state.tts.stream_speech(
+                        text,
+                        voice=voice,
+                        audio_format="mp3",
+                        model=model,
+                ):
+                    if chunk:
+                        collected.extend(chunk)
+                        yield chunk
+
+                # Debug write after generation completes
+                try:
+                    _write_debug_tts(bytes(collected), prefix="tts_http", ext="mp3")
+                except Exception:
+                    pass
+
+            return StreamingResponse(gen(), media_type="audio/mpeg")
+
         async def emit_tts(text: str, msg: WSClientMessage) -> None:
+            # Strong recommendation: use mp3 for web compatibility
+            audio_format = (msg.tts_format or "mp3").lower()
+
             tts_queue = _iter_tts_chunks(
                 app.state.tts,
                 text,
                 voice=msg.tts_voice,
-                audio_format=msg.tts_format,
+                audio_format=audio_format,
                 model=msg.tts_model,
             )
-            await manager.safe_send(ws, WSServerEvent(type="tts_start"))
+
+            # Collect all chunks so we can write a debug file
+            collected = bytearray()
+
+            await manager.safe_send(
+                ws,
+                WSServerEvent(type="tts_start", payload={"format": audio_format}),
+            )
+
             while True:
                 chunk = await tts_queue.get()
                 if chunk is None:
                     break
+                collected.extend(chunk)
+
                 await manager.safe_send(
                     ws,
                     WSServerEvent(
@@ -402,6 +468,21 @@ def create_app(
                         payload={"audio_chunk_b64": base64.b64encode(chunk).decode("ascii")},
                     ),
                 )
+
+            # Write debug file
+            try:
+                ext = "mp3" if audio_format == "mp3" else audio_format
+                dbg_path = _write_debug_tts(bytes(collected), prefix="tts", ext=ext)
+                await manager.safe_send(
+                    ws,
+                    WSServerEvent(type="message", message=f"TTS debug: wrote {dbg_path}"),
+                )
+            except Exception as exc:
+                await manager.safe_send(
+                    ws,
+                    WSServerEvent(type="message", message=f"TTS debug: failed to write audio: {exc}"),
+                )
+
             await manager.safe_send(ws, WSServerEvent(type="tts_end"))
 
         async def run_turn_from_text(user_text: str, msg: WSClientMessage) -> None:

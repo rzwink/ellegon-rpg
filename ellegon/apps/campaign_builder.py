@@ -7,11 +7,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from dotenv import load_dotenv
 from jsonschema import Draft202012Validator
 
 from ellegon import config
 from ellegon.campaigns.schema import load_schema
 from ellegon.llm.gateway import LLMGateway, OpenAIGateway
+
+load_dotenv()
 
 _JSON_BLOCK_RE = re.compile(r"```(?:json)?\s*(\{.*\})\s*```", re.DOTALL)
 
@@ -79,9 +82,9 @@ class CampaignBuilder:
         acts = self._call_json(
             "acts",
             (
-                "Write only a JSON array called acts with exactly 3 act objects. "
-                "Each act must include: id, title, purpose, narrative_summary, key_elements, "
-                "possible_player_actions, success_condition, failure_guidance, dm_notes."
+                """
+                Write ONLY a JSON array of exactly 3 act objects. Do not wrap it in {"acts": ...}. Each act must include id, title, purpose, narrative_summary, key_elements (array of strings), possible_player_actions (array of strings), success_condition, failure_guidance, dm_notes.
+                """
             ),
             json.dumps(campaign_brief, indent=2),
         )
@@ -276,6 +279,7 @@ class CampaignBuilder:
     def _normalize_acts(self, value: list[Dict[str, Any]]) -> list[Dict[str, Any]]:
         acts = []
         for i, act in enumerate(value, start=1):
+
             raw_id = str(act.get("id") or f"act_{i}")
             act_id = raw_id if raw_id.startswith("act_") else f"act_{self._slugify(raw_id)}"
             acts.append(
@@ -393,6 +397,7 @@ def main() -> int:
 
     builder = CampaignBuilder(model=args.model, campaigns_root=args.campaigns_root)
     context = builder.generate(source_text)
+    print(context)
     campaign = builder.build_campaign_json(context)
     output = builder.write_campaign(campaign, args.campaign_folder)
 
