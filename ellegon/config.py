@@ -7,6 +7,11 @@ from typing import Optional
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MODEL = "gpt-5.2-2025-12-11"
 DEFAULT_STT_MODEL = "gpt-4o-mini-transcribe"
+DEFAULT_STT_PRIMARY_SPEAKER_PROMPT = (
+    "Focus on the primary speaker nearest the microphone. "
+    "If multiple people overlap, prioritize the primary speaker and ignore side chatter when possible."
+)
+DEFAULT_MASK_PROFANITY_IN_STT = True
 DEFAULT_TTS_MODEL = "gpt-4o-mini-tts"
 DEFAULT_TTS_VOICE = "cedar"
 DEFAULT_TTS_FORMAT = "pcm"
